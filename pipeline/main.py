@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 import logging
 import os
 import sys
@@ -27,20 +28,23 @@ from pipeline.summarize import build_sections
 
 log = logging.getLogger("main")
 
-# Cron (UTC) → Toronto UTC offset (hours) at which that trigger is the 7:30 run.
-SCHEDULES = {"30 11 * * *": -4, "30 12 * * *": -5}
 
 
 def load_config(path: Path = build.ROOT / "config.yaml") -> dict:
     return yaml.safe_load(path.read_text("utf-8"))
 
 
-def should_run(schedule: str | None, now: datetime, tz: str) -> bool:
-    """DST guard: two cron triggers fire daily; only the one matching today's Toronto offset proceeds."""
-    if not schedule:  # manual / local run
+def is_due(scheduled: bool, now: datetime, every_hours: float, data_dir: Path = build.DATA) -> bool:
+    """The workflow fires hourly (GitHub drops some scheduled runs); a scheduled run proceeds only once the
+    latest briefing is `every_hours` old, minus 15 minutes of slack for cron jitter. Manual runs always proceed."""
+    if not scheduled:
         return True
-    offset = now.astimezone(ZoneInfo(tz)).utcoffset().total_seconds() / 3600
-    return SCHEDULES.get(schedule.strip(), offset) == offset  # crons not listed here always run
+    try:
+        index = json.loads((data_dir / "index.json").read_text("utf-8"))
+        last = datetime.fromisoformat(index["dates"][0]["generated_at"])
+    except (OSError, ValueError, KeyError, IndexError):
+        return True  # no usable history: build one
+    return (now - last).total_seconds() >= every_hours * 3600 - 15 * 60
 
 
 def health_table(results: list[FetchResult]) -> str:
@@ -136,8 +140,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--dry-run", action="store_true", help="fetch and process, write nothing")
     p.add_argument("--render-only", action="store_true", help="rebuild public/ from data/ without fetching")
     p.add_argument("--no-cache", action="store_true", help="ignore the ETag/Last-Modified cache")
-    p.add_argument("--schedule", default=os.environ.get("SCHEDULE") or None,
-                   help="cron string that triggered this run (set by GitHub Actions)")
+    p.add_argument("--scheduled", action="store_true", default=os.environ.get("GITHUB_EVENT_NAME") == "schedule",
+                   help="skip unless the last briefing is `update_every_hours` old (set automatically on cron runs)")
     args = p.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, stream=sys.stdout,
@@ -148,8 +152,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.render_only:
         build.render_site(config)
         return 0
-    if not should_run(args.schedule, datetime.now(timezone.utc), config["site"].get("timezone", "America/Toronto")):
-        log.info("skip: trigger %r is not 7:30 Toronto time today (DST guard)", args.schedule)
+    every = config.get("update_every_hours", 4)
+    if not is_due(args.scheduled, datetime.now(timezone.utc), every):
+        log.info("skip: the latest briefing is less than %s hours old", every)
         _gh_output(skipped="true")
         return 0
     _gh_output(skipped="false")

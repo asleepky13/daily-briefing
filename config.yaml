@@ -12,7 +12,8 @@ site:
 # Honest identification for publishers (SEC EDGAR requires a contact address).
 user_agent: "DailyBriefingBot/1.0 (personal news digest; contact: you@example.com)"
 
-recency_hours: 26          # keep stories published within this many hours
+update_every_hours: 4      # how often the briefing refreshes (the workflow checks hourly)
+recency_hours: 12          # keep stories published within this many hours
 max_items_per_section: 40  # stories (after de-duplication) shown per section
 top_n: 5                   # "Top 5" size
 retention_days: 90         # older daily files in data/ are deleted

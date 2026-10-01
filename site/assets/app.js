@@ -247,7 +247,12 @@
       `<span class="zh" lang="zh-Hant">${esc(fmtDayZh(day.date))}</span>${esc(fmtDay(day.date))}` +
       `<span class="sep">/</span>Updated ${esc(fmtExact(day.generated_at))} Toronto time` +
       `<span class="sep">/</span><strong>${s.scanned}</strong> scanned, <strong>${s.kept}</strong> kept` +
-      (fresh ? `<span class="sep">/</span><strong>${fresh}</strong> new since your last visit` : "");
+      (fresh ? `<span class="sep">/</span><strong>${fresh}</strong> new since your last visit` : "")
+    const age = (Date.now() - new Date(day.generated_at)) / 36e5;
+    if (!DATE && age > 6) {
+      document.getElementById("hud").insertAdjacentHTML("beforeend",
+        `<span class="stale">This briefing is ${Math.round(age)} hours old. The next update is running late; it usually arrives within the hour.</span>`);
+    }
   };
 
   const footer = () => {

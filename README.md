@@ -1,6 +1,6 @@
 # Daily Briefing
 
-A personal news site that builds itself every morning. At 7:30 a.m. Toronto time, a GitHub robot reads about 35 news and press-release feeds. It keeps the stories that match your keywords, merges duplicates, ranks what matters, and publishes four pages: **Finance**, **Tech**, **Global Politics** and **Local Politics**. It's free, with no server, no database and no AI.
+A personal news site that rebuilds itself every 4 hours. Each time, a GitHub robot reads about 35 news and press-release feeds. It keeps the stories that match your keywords, merges duplicates, ranks what matters, and publishes four pages: **Finance**, **Tech**, **Global Politics** and **Local Politics**. It's free, with no server, no database and no AI.
 
 ---
 
@@ -89,7 +89,7 @@ Add `require_keyword_match: false` to keep everything a feed publishes. For a pa
 
 **Local region:** change `region:` (city, province, country). The Google News queries in the Local section fill them in automatically. You'll also want to swap in your city's own outlets.
 
-Also in `config.yaml`: `recency_hours` (26), `max_items_per_section` (40), `retention_days` (90), `similarity_threshold` (85).
+Also in `config.yaml`: `update_every_hours` (4), `recency_hours` (12), `max_items_per_section` (40), `retention_days` (90), `similarity_threshold` (85).
 
 ---
 

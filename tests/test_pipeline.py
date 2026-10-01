@@ -7,7 +7,7 @@ import pytest
 
 from pipeline.dedupe import canonicalize_url, cluster, merge_exact
 from pipeline.filter import Rule, RuleError, assign_sections, recent
-from pipeline.main import should_run
+from pipeline.main import is_due
 from pipeline.parse import clean_text, make_item, parse_feed, parse_html, resolve_gnews
 
 FIX = Path(__file__).parent / "fixtures"
@@ -162,16 +162,17 @@ def test_recency_window():
     assert recent([fresh, stale], NOW, 26) == [fresh]
 
 
-@pytest.mark.parametrize("schedule,now,ok", [
-    ("30 11 * * *", datetime(2026, 7, 1, 11, 30, tzinfo=timezone.utc), True),   # EDT: 7:30
-    ("30 12 * * *", datetime(2026, 7, 1, 12, 30, tzinfo=timezone.utc), False),  # EDT: 8:30
-    ("30 11 * * *", datetime(2026, 1, 5, 11, 30, tzinfo=timezone.utc), False),  # EST: 6:30
-    ("30 12 * * *", datetime(2026, 1, 5, 12, 45, tzinfo=timezone.utc), True),   # EST: 7:45 (late cron still runs)
-    (None, datetime(2026, 1, 5, 3, 0, tzinfo=timezone.utc), True),              # manual run
-    ("30 5,11,17,23 * * *", datetime(2026, 1, 5, 5, 30, tzinfo=timezone.utc), True),  # every-6h cron, no guard
+@pytest.mark.parametrize("scheduled,hours_since,ok", [
+    (True, 1, False),      # hourly cron, briefing still fresh
+    (True, 3.8, True),     # within the 15-minute jitter slack of 4h
+    (True, 13, True),      # GitHub dropped runs: catch up on the next hourly tick
+    (False, 0.1, True),    # manual "Run workflow" always proceeds
 ])
-def test_dst_guard(schedule, now, ok):
-    assert should_run(schedule, now, "America/Toronto") is ok
+def test_is_due(tmp_path, scheduled, hours_since, ok):
+    last = NOW - timedelta(hours=hours_since)
+    (tmp_path / "index.json").write_text(f'{{"dates": [{{"generated_at": "{last.isoformat()}"}}]}}')
+    assert is_due(scheduled, NOW, 4, tmp_path) is ok
+    assert is_due(True, NOW, 4, tmp_path / "missing") is True
 
 
 # ── entity-aware clustering, velocity, sources, keyword report ──

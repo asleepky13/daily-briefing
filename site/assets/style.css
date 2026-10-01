@@ -1,11 +1,16 @@
 /* Daily Briefing / 每日簡報: Kowloon night signage over a readable news column. */
 :root {
-  --bg: #0e1719; --panel: #142124; --panel-2: #1a2b2f; --line: #2a4044; --ink: #e8f1ec; --muted: #9bb3ab;
-  --red: #ff3b4e; --jade: #2de2c0; --amber: #ffb03a; --blue: #6fb6ff; --tile: #2a404455;
+  --bg: #0b1416; --panel: #132023; --panel-2: #1a2b2f; --line: #2a4044; --ink: #e8f1ec; --muted: #9bb3ab;
+  --red: #ff3b4e; --jade: #2de2c0; --amber: #ffb03a; --blue: #6fb6ff; --tile: #2a404433;
   --finance: var(--amber); --tech: var(--jade); --global: var(--red); --local: var(--blue);
   --c-finance: #c4802a; --c-tech: #17a088; --c-global: #ee3546; --c-local: #4a8fd6;
   --spark: #7f968f; --spark-bar: #34504f; --up: #2de2c0; --down: #ff6b78;
-  --glow: 10px; --bright-k: 1; --rain: .9; --sign-ink: #fff2f3; --mix: 10%; --mast-top: #070c0d;
+  --glow: 10px; --bright-k: 1; --rain: .9; --mist: 0; --sign-ink: #fff2f3; --mix: 10%;
+  /* night: deep sky, neon haze rising off the street, a few hundred lit windows */
+  --sky-top: #050b0d; --sky-mid: #0a1417; --haze-1: #ff3b4e2e; --haze-2: #2de2c024;
+  --sky-far: #0f1c1f; --fa1: #08100f; --fa2: #0a1314; --fa3: #091112; --fa4: #0b1517;
+  --pane: #16262a; --lit: #ffcf7a; --lit2: #7fe9d6; --ac: #1f3034; --tank: #12201f; --aerial: #24383b;
+  --sign-op: .9; --sky-op: 1;
   --cjk: "Noto Serif TC", "PMingLiU", "Songti TC", serif;
   --ui: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
   --read: "Newsreader", Georgia, serif;
@@ -13,21 +18,31 @@
   color-scheme: dark;
 }
 :root[data-theme="light"] {
-  --bg: #eef0ea; --panel: #ffffff; --panel-2: #f5f6f1; --line: #c9d1cb; --ink: #13201f; --muted: #4a5c58;
-  --red: #b3122a; --jade: #00695c; --amber: #8a5200; --blue: #1f5fa8; --tile: #c9d1cb66;
+  --bg: #e9efec; --panel: #fbfcfa; --panel-2: #f1f5f2; --line: #c7d3cd; --ink: #13201f; --muted: #4a5c58;
+  --red: #b3122a; --jade: #00695c; --amber: #8a5200; --blue: #1f5fa8; --tile: #c7d3cd55;
   --c-finance: #8a5200; --c-tech: #008069; --c-global: #b3122a; --c-local: #1f5fa8;
   --spark: #6b7d78; --spark-bar: #c9d3cd; --up: #00695c; --down: #b3122a;
-  --glow: 0px; --bright-k: 0; --rain: .35; --sign-ink: #ffffff; --mix: 100%; --mast-top: #dfe5df;
+  --glow: 0px; --bright-k: 0; --rain: 0; --mist: .85; --sign-ink: #ffffff; --mix: 100%;
+  /* morning: peach dawn over mist; pastel public-housing facades (Choi Hung palette); neon switched off */
+  --sky-top: #f7dcc8; --sky-mid: #f3e6dc; --haze-1: #ffe7b866; --haze-2: #bfe2d244;
+  --sky-far: #d5dfe0; --fa1: #bfe2d2; --fa2: #f1c6c9; --fa3: #f2e0a6; --fa4: #c6d8ec;
+  --pane: #8fa6a855; --lit: #8fa6a855; --lit2: #fff7e0; --ac: #e8ecea; --tank: #9fb2b0; --aerial: #7b8f8d;
+  --sign-op: .55; --sky-op: .9;
   color-scheme: light;
 }
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
-    --bg: #eef0ea; --panel: #ffffff; --panel-2: #f5f6f1; --line: #c9d1cb; --ink: #13201f; --muted: #4a5c58;
-    --red: #b3122a; --jade: #00695c; --amber: #8a5200; --blue: #1f5fa8; --tile: #c9d1cb66;
-    --c-finance: #8a5200; --c-tech: #008069; --c-global: #b3122a; --c-local: #1f5fa8;
+  --bg: #e9efec; --panel: #fbfcfa; --panel-2: #f1f5f2; --line: #c7d3cd; --ink: #13201f; --muted: #4a5c58;
+  --red: #b3122a; --jade: #00695c; --amber: #8a5200; --blue: #1f5fa8; --tile: #c7d3cd55;
+  --c-finance: #8a5200; --c-tech: #008069; --c-global: #b3122a; --c-local: #1f5fa8;
   --spark: #6b7d78; --spark-bar: #c9d3cd; --up: #00695c; --down: #b3122a;
-  --glow: 0px; --bright-k: 0; --rain: .35; --sign-ink: #ffffff; --mix: 100%; --mast-top: #dfe5df;
-    color-scheme: light;
+  --glow: 0px; --bright-k: 0; --rain: 0; --mist: .85; --sign-ink: #ffffff; --mix: 100%;
+  /* morning: peach dawn over mist; pastel public-housing facades (Choi Hung palette); neon switched off */
+  --sky-top: #f7dcc8; --sky-mid: #f3e6dc; --haze-1: #ffe7b866; --haze-2: #bfe2d244;
+  --sky-far: #d5dfe0; --fa1: #bfe2d2; --fa2: #f1c6c9; --fa3: #f2e0a6; --fa4: #c6d8ec;
+  --pane: #8fa6a855; --lit: #8fa6a855; --lit2: #fff7e0; --ac: #e8ecea; --tank: #9fb2b0; --aerial: #7b8f8d;
+  --sign-op: .55; --sky-op: .9;
+  color-scheme: light;
   }
 }
 
@@ -40,6 +55,11 @@ body {
   background-image: linear-gradient(var(--tile) 1px, transparent 1px), linear-gradient(90deg, var(--tile) 1px, transparent 1px);
   background-size: 14px 14px;
 }
+body::before { /* fixed light layer (composited, no scroll repaint): street-neon spill at night, low sun in the morning */
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(60% 45% at 0% 0%, var(--haze-1), transparent 70%),
+              radial-gradient(55% 50% at 100% 100%, var(--haze-2), transparent 70%);
+}
 a { color: inherit; text-decoration-color: color-mix(in srgb, var(--jade) 55%, transparent); text-underline-offset: .2em; transition: color .18s; }
 a:hover { color: var(--jade); }
 button { cursor: pointer; }
@@ -50,8 +70,19 @@ button { cursor: pointer; }
 .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* ── Masthead ─────────────────────────────────────────── */
-.mast { position: relative; overflow: hidden; border-bottom: 1px solid var(--line);
-  background: linear-gradient(to bottom, var(--mast-top), var(--bg)); }
+.mast { position: relative; isolation: isolate; overflow: hidden; border-bottom: 1px solid var(--line);
+  background: radial-gradient(40% 70% at 22% 100%, var(--haze-1), transparent 75%),
+              radial-gradient(45% 80% at 85% 100%, var(--haze-2), transparent 75%),
+              linear-gradient(to bottom, var(--sky-top), var(--sky-mid) 55%, var(--bg)); }
+.skyline { position: absolute; inset: auto 0 0 auto; width: min(100%, 64rem); height: 100%; z-index: 0; pointer-events: none;
+  opacity: var(--sky-op); mask-image: linear-gradient(to right, transparent 30%, #000 75%); }
+.mast-inner > :not(.skyline) { position: relative; z-index: 2; }  /* layers: skyline 0, mist 1, content 2 */
+.mist { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: var(--mist); overflow: hidden; }
+.mist::before { /* morning haze drifting between the blocks */
+  content: ""; position: absolute; inset: 35% -50% 20% -50%; will-change: transform;
+  background: radial-gradient(40% 50% at 30% 50%, #ffffffb3, transparent 70%), radial-gradient(35% 45% at 75% 60%, #ffffff99, transparent 70%);
+  animation: drift 48s ease-in-out infinite alternate; }
+@keyframes drift { to { transform: translateX(18%); } }
 .rain { position: absolute; inset: 0; overflow: hidden; pointer-events: none; opacity: var(--rain);
   mask-image: linear-gradient(to bottom, #000 30%, transparent); }
 .rain::before { /* transform-only animation: composited, no repaint per frame */
@@ -80,9 +111,10 @@ button { cursor: pointer; }
 .mast-body { min-width: 0; }
 .brand { margin: 0; font: 700 clamp(2.4rem, 8.5vw, 5.6rem)/.9 var(--ui); text-transform: uppercase; letter-spacing: .005em; }
 .brand a { text-decoration: none; color: var(--ink); text-shadow: 0 0 calc(var(--glow) * 2) color-mix(in srgb, var(--jade) 35%, transparent); }
-.hud { margin: .6rem 0 0; font: 500 1.05rem/1.45 var(--ui); color: var(--muted); }
+.hud { margin: .6rem 0 0; font: 500 1.05rem/1.45 var(--ui); color: var(--muted); text-shadow: 0 0 6px var(--bg), 0 0 2px var(--bg); }
 .hud strong { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
 .hud .zh { color: var(--amber); font-size: .95em; margin-right: .6em; }
+.hud .stale { display: block; margin-top: .25rem; color: var(--amber); font-weight: 600; }
 .hud .sep { color: var(--red); margin: 0 .45em; }
 .tools { display: flex; gap: .5rem; }
 .icon-btn { width: 44px; height: 44px; display: grid; place-items: center; background: var(--panel); color: var(--ink);
