@@ -65,7 +65,8 @@ def update_index(today: date, retention_days: int, data_dir: Path = DATA) -> dic
 
 
 # Chinese characters the UI itself uses; config `sign:` values are added at build time.
-UI_CJK = "每日簡報今日檔案收藏調校新星期一二三四五六年月號"
+# 九龍 page + the Walled City signboards it lights: 牙科 dentist, 冰室 ice café, 押 pawnshop, 茶餐廳, 酒家
+UI_CJK = "每日簡報今日檔案收藏調校新星期一二三四五六年月號九龍牙科冰室押茶餐廳酒家"
 
 
 def _nav(sections: dict, root: str, archive: bool, current: str) -> str:
@@ -78,12 +79,13 @@ def _nav(sections: dict, root: str, archive: bool, current: str) -> str:
         cur = ' aria-current="page"' if key == current else ""
         sign = f'<span class="zh" lang="zh-Hant" aria-hidden="true">{escape(zh)}</span>' if zh else ""
         out.append(f'<li><a href="{escape(href)}" data-key="{key}"{cur}>{sign}<span>{escape(name)}</span></a></li>')
-    extra = [("archive/", "Archive", "檔案", "archive"), ("saved/", "Saved", "收藏", "saved")]
-    for path, name, zh, key in extra:
+    def page_link(path: str, name: str, zh: str, key: str) -> str:
         href = ("../../" + path) if archive else root + path
         cur = ' aria-current="page"' if current == key else ""
-        out.append(f'<li><a href="{href}" data-key="{key}"{cur}><span class="zh" lang="zh-Hant" aria-hidden="true">{zh}</span>'
-                   f'<span>{name}</span></a></li>')
+        return (f'<li><a href="{href}" data-key="{key}"{cur}><span class="zh" lang="zh-Hant" aria-hidden="true">{zh}</span>'
+                f'<span>{name}</span></a></li>')
+    out.insert(1, page_link("kowloon/", "Kowloon", "九龍", "kowloon"))  # right after Today
+    out += [page_link("archive/", "Archive", "檔案", "archive"), page_link("saved/", "Saved", "收藏", "saved")]
     return "\n".join(out)
 
 
@@ -134,7 +136,8 @@ def render_site(config: dict, data_dir: Path = DATA, site_dir: Path = SITE, out_
 
     pages = [(out_dir, "./", "home", "", title), (out_dir / "archive", "../", "archive", "", f"Archive · {title}"),
              (out_dir / "saved", "../", "saved", "", f"Saved · {title}"),
-             (out_dir / "tuning", "../", "tuning", "", f"Keyword tuning · {title}")]
+             (out_dir / "tuning", "../", "tuning", "", f"Keyword tuning · {title}"),
+             (out_dir / "kowloon", "../", "kowloon", "", f"Kowloon · {title}")]
     pages += [(out_dir / k, "../", "section", k, f"{s['name']} · {title}") for k, s in sections.items()]
     for folder, root, view, key, page_title in pages:
         _render(template, folder / "index.html", root=root, view=view, section=key, day="", title=page_title,

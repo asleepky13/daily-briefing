@@ -8,9 +8,10 @@
   --glow: 10px; --bright-k: 1; --rain: .9; --mist: 0; --sign-ink: #fff2f3; --mix: 10%;
   /* night: deep sky, neon haze rising off the street, a few hundred lit windows */
   --sky-top: #050b0d; --sky-mid: #0a1417; --haze-1: #ff3b4e2e; --haze-2: #2de2c024;
-  --sky-far: #0f1c1f; --fa1: #08100f; --fa2: #0a1314; --fa3: #091112; --fa4: #0b1517;
-  --pane: #16262a; --lit: #ffcf7a; --lit2: #7fe9d6; --ac: #1f3034; --tank: #12201f; --aerial: #24383b;
-  --sign-op: .9; --sky-op: 1;
+  --sky-far: #0f1c1f; --fa1: #0d1618; --fa2: #0f191b; --fa3: #0c1416; --fa4: #101b1e; --stain: #000;
+  --pane: #172629; --lit: #ffcf7a; --lit2: #7fe9d6; --ac: #213236; --tank: #142224; --aerial: #2a3e41; --pole: #2a3a3d;
+  --ld0: #5a2a30; --ld1: #23364f; --ld2: #3a4446; --ld3: #5a4a25; --sg-off: #2a2224; --plane: #1d2b2e;
+  --sky-op: 1;
   --cjk: "Noto Serif TC", "PMingLiU", "Songti TC", serif;
   --ui: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
   --read: "Newsreader", Georgia, serif;
@@ -23,11 +24,12 @@
   --c-finance: #8a5200; --c-tech: #008069; --c-global: #b3122a; --c-local: #1f5fa8;
   --spark: #6b7d78; --spark-bar: #c9d3cd; --up: #00695c; --down: #b3122a;
   --glow: 0px; --bright-k: 0; --rain: 0; --mist: .85; --sign-ink: #ffffff; --mix: 100%;
-  /* morning: peach dawn over mist; pastel public-housing facades (Choi Hung palette); neon switched off */
-  --sky-top: #f7dcc8; --sky-mid: #f3e6dc; --haze-1: #ffe7b866; --haze-2: #bfe2d244;
-  --sky-far: #d5dfe0; --fa1: #bfe2d2; --fa2: #f1c6c9; --fa3: #f2e0a6; --fa4: #c6d8ec;
-  --pane: #8fa6a855; --lit: #8fa6a855; --lit2: #fff7e0; --ac: #e8ecea; --tank: #9fb2b0; --aerial: #7b8f8d;
-  --sign-op: .55; --sky-op: .9;
+  /* morning over the Walled City: dawn haze, low sun, weathered concrete with water stains, laundry out */
+  --sky-top: #dfe4e3; --sky-mid: #ece6d8; --haze-1: #ffd9a066; --haze-2: #cfd8d544;
+  --sky-far: #cfd3cf; --fa1: #cbc2b3; --fa2: #bdb5a7; --fa3: #d5ccbd; --fa4: #c2c4bb; --stain: #7d7566;
+  --pane: #6f7774; --lit: #f3c86a; --lit2: #cfeee4; --ac: #ebe7dd; --tank: #9a9488; --aerial: #6d6a63; --pole: #7b766d;
+  --ld0: #b3122a; --ld1: #1f5fa8; --ld2: #f4f1ea; --ld3: #d8a21f; --sg-off: #8b8378; --plane: #4f5655;
+  --sky-op: .95;
   color-scheme: light;
 }
 @media (prefers-color-scheme: light) {
@@ -37,11 +39,12 @@
   --c-finance: #8a5200; --c-tech: #008069; --c-global: #b3122a; --c-local: #1f5fa8;
   --spark: #6b7d78; --spark-bar: #c9d3cd; --up: #00695c; --down: #b3122a;
   --glow: 0px; --bright-k: 0; --rain: 0; --mist: .85; --sign-ink: #ffffff; --mix: 100%;
-  /* morning: peach dawn over mist; pastel public-housing facades (Choi Hung palette); neon switched off */
-  --sky-top: #f7dcc8; --sky-mid: #f3e6dc; --haze-1: #ffe7b866; --haze-2: #bfe2d244;
-  --sky-far: #d5dfe0; --fa1: #bfe2d2; --fa2: #f1c6c9; --fa3: #f2e0a6; --fa4: #c6d8ec;
-  --pane: #8fa6a855; --lit: #8fa6a855; --lit2: #fff7e0; --ac: #e8ecea; --tank: #9fb2b0; --aerial: #7b8f8d;
-  --sign-op: .55; --sky-op: .9;
+  /* morning over the Walled City: dawn haze, low sun, weathered concrete with water stains, laundry out */
+  --sky-top: #dfe4e3; --sky-mid: #ece6d8; --haze-1: #ffd9a066; --haze-2: #cfd8d544;
+  --sky-far: #cfd3cf; --fa1: #cbc2b3; --fa2: #bdb5a7; --fa3: #d5ccbd; --fa4: #c2c4bb; --stain: #7d7566;
+  --pane: #6f7774; --lit: #f3c86a; --lit2: #cfeee4; --ac: #ebe7dd; --tank: #9a9488; --aerial: #6d6a63; --pole: #7b766d;
+  --ld0: #b3122a; --ld1: #1f5fa8; --ld2: #f4f1ea; --ld3: #d8a21f; --sg-off: #8b8378; --plane: #4f5655;
+  --sky-op: .95;
   color-scheme: light;
   }
 }
@@ -77,6 +80,21 @@ button { cursor: pointer; }
 .skyline { position: absolute; inset: auto 0 0 auto; width: min(100%, 64rem); height: 100%; z-index: 0; pointer-events: none;
   opacity: var(--sky-op); mask-image: linear-gradient(to right, transparent 30%, #000 75%); }
 .mast-inner > :not(.skyline) { position: relative; z-index: 2; }  /* layers: skyline 0, mist 1, content 2 */
+/* city (header skyline + Kowloon page): generated in app.js, coloured here */
+.city .far { fill: var(--sky-far); } .city .fa0 { fill: var(--fa1); } .city .fa1 { fill: var(--fa2); }
+.city .fa2 { fill: var(--fa3); } .city .fa3 { fill: var(--fa4); } .city .stain { fill: var(--stain); opacity: .22; }
+.city .cw { fill: var(--pane); } .city .on { fill: var(--lit); } .city .on2 { fill: var(--lit2); }
+.city .ac { fill: var(--ac); } .city .tank { fill: var(--tank); } .city .aerial { stroke: var(--aerial); stroke-width: 1.2; fill: none; }
+.city .pole { stroke: var(--pole); stroke-width: 1; } .city .ld0 { fill: var(--ld0); } .city .ld1 { fill: var(--ld1); }
+.city .ld2 { fill: var(--ld2); } .city .ld3 { fill: var(--ld3); }
+.city .sg { fill: var(--sg-off); } .city .sg.on { filter: drop-shadow(0 0 4px currentColor); }
+.city .sg.on.s0 { fill: #e8283c; color: #ff3b4e; } .city .sg.on.s1 { fill: #12b89a; color: #2de2c0; } .city .sg.on.s2 { fill: #e8901f; color: #ffb03a; }
+.city .sgt { font: 900 10px var(--cjk); text-anchor: middle; fill: #ffffff55; } .city .sgt.on { fill: #fff; }
+.city .plane { fill: var(--plane); animation: approach 46s linear 3s infinite; transform: translate(1400px, 18px); }
+.city .beacon { fill: #ff3b4e; animation: beacon 1.2s steps(1) infinite; }
+@keyframes approach { /* a jet on the Kai Tak approach, skimming the rooftops, every 46 seconds */
+  0% { transform: translate(1300px, 14px); } 32% { transform: translate(-120px, 44px); } 100% { transform: translate(-120px, 44px); } }
+@keyframes beacon { 50% { opacity: .2; } }
 .mist { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: var(--mist); overflow: hidden; }
 .mist::before { /* morning haze drifting between the blocks */
   content: ""; position: absolute; inset: 35% -50% 20% -50%; will-change: transform;
@@ -95,12 +113,12 @@ button { cursor: pointer; }
 
 .sign-v { /* the neon signboard: 每日簡報 */
   display: block; text-decoration: none; padding: .55rem .4rem;
-  border: 3px solid var(--red); border-radius: 4px; background: color-mix(in srgb, var(--red) var(--mix), var(--bg));
-  box-shadow: 0 0 var(--glow) var(--red), inset 0 0 var(--glow) color-mix(in srgb, var(--red) 50%, transparent);
+  --tube: #ff3b4e; border: 3px solid var(--tube); border-radius: 4px; background: #1c0a0d;
+  box-shadow: 0 0 10px var(--tube), 0 0 26px #ff3b4e55, inset 0 0 10px #ff3b4e80;
   animation: warmup 1.8s steps(1) both;
 }
 .sign-v span { display: flex; flex-direction: column; align-items: center; font: 900 clamp(1.5rem, 4.2vw, 2.5rem)/1.08 var(--cjk);
-  color: var(--sign-ink); text-shadow: 0 0 calc(var(--glow) * .4) var(--red), 0 0 var(--glow) var(--red), 0 0 calc(var(--glow) * 2.6) var(--red); }
+  color: #fff2f3; text-shadow: 0 0 4px var(--tube), 0 0 10px var(--tube), 0 0 26px var(--tube); }
 .sign-v b { font-weight: 900; }
 .sign-v b:last-child { animation: buzz 9s steps(1) 3s infinite; }
 @keyframes warmup { /* a neon tube striking */
@@ -279,6 +297,38 @@ input[type="search"]:focus, select:focus, input[type="date"]:focus { border-colo
 .tag-hot { border-color: var(--red); box-shadow: 0 0 calc(var(--glow) * .6) color-mix(in srgb, var(--red) 60%, transparent); }
 .tag-up { border-color: var(--up); }
 
+/* ── Kowloon page ─────────────────────────────────────── */
+.scene { margin: 0 0 1.25rem; border: 1px solid var(--line); overflow: hidden; aspect-ratio: 1200 / 560; max-height: 70vh;
+  /* the city page is always night: these are the night tokens, whatever the site theme */
+  --sky-far: #0f1c1f; --fa1: #0d1618; --fa2: #0f191b; --fa3: #0c1416; --fa4: #101b1e; --stain: #000;
+  --pane: #172629; --lit: #ffcf7a; --lit2: #7fe9d6; --ac: #213236; --tank: #142224; --aerial: #2a3e41; --pole: #2a3a3d;
+  --ld0: #5a2a30; --ld1: #23364f; --ld2: #3a4446; --ld3: #5a4a25; --sg-off: #2a2224; --plane: #2c3f43;
+  background: radial-gradient(45% 60% at 25% 100%, #ff3b4e33, transparent 75%), radial-gradient(45% 60% at 80% 100%, #2de2c02b, transparent 75%),
+              linear-gradient(#03080a, #0a1518 70%, #101d20); }
+.scene svg { display: block; width: 100%; height: 100%; }
+.power { display: grid; gap: .4rem; max-width: 40rem; margin: 0 0 1.75rem; }
+.power-day { margin: 0; font: 500 1.15rem var(--ui); color: var(--muted); display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem 1rem; }
+.power-day strong { font: 700 3rem/1 var(--ui); color: var(--ink); }
+.power progress { width: 100%; height: 12px; appearance: none; border: 1px solid var(--line); background: var(--panel-2); }
+.power progress::-webkit-progress-bar { background: var(--panel-2); }
+.power progress::-webkit-progress-value { background: #e8b44a; box-shadow: 0 0 calc(var(--glow) * .8) #ffcf7a; }
+.power progress::-moz-progress-bar { background: #e8b44a; }
+.power-next, .power-best { margin: 0; font: 500 1.1rem/1.45 var(--ui); }
+.power-best { color: var(--muted); }
+.ms-h { font: 700 1.5rem var(--ui); margin: 0 0 .6rem; }
+.milestones { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; max-width: 40rem; }
+.milestones li { display: grid; grid-template-columns: 4.2rem 4.5rem 1fr auto; align-items: center; gap: .75rem;
+  padding: .55rem .8rem; background: var(--panel); border: 1px solid var(--line); font: 500 1.05rem var(--ui); }
+.ms-day { color: var(--muted); font-weight: 600; }
+.ms-sign { justify-self: start; writing-mode: vertical-rl; font: 900 1rem/1.05 var(--cjk); padding: .35rem .2rem; color: #ffffff88;
+  background: #2a2224; border: 1px solid #3a2f31; }
+.ms-sign.ms-all { width: 1.4rem; height: 2.6rem; background: repeating-linear-gradient(#2a2224 0 4px, #6b5a3a 4px 7px); }
+.ms-state { color: var(--muted); }
+.milestones .done .ms-sign { color: #fff; background: #e8283c; border-color: #ff3b4e; box-shadow: 0 0 calc(var(--glow) * .8) #ff3b4e; }
+.milestones .done .ms-all { background: repeating-linear-gradient(#2a2224 0 4px, #ffcf7a 4px 7px); }
+.milestones .done .ms-state { color: var(--up); font-weight: 700; }
+[data-key="kowloon"] { --sec: var(--amber); }
+
 /* ── Keyword tuning ──────────────────────────────────── */
 .lede { margin: 0; max-width: 62ch; }
 code { font: 500 .92em var(--led); background: var(--panel-2); border: 1px solid var(--line); padding: 0 .3em; }
@@ -317,4 +367,5 @@ kbd { font: 600 .95rem var(--led); padding: .1rem .4rem; border: 1px solid var(-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .led { overflow-x: auto; }
+  .city .plane { display: none; }
 }

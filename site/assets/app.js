@@ -84,6 +84,62 @@
     el.style.setProperty("--heat", Math.min(streak.count, 30) / 30); // full brightness at a 30-day streak
     el.hidden = false;
   }
+
+  // ── the Walled City: a seeded skyline whose lights follow the streak ──
+  // Each window draws its own random number once (fixed seed), and is lit when it falls under the streak's share,
+  // so a longer streak only ever adds lights: the same windows stay on day after day.
+  const SIGNS = [ // hanging signboards the Walled City was known for, switched on at these streak days
+    { day: 1, zh: "牙科", en: "Dentist" }, { day: 3, zh: "冰室", en: "Ice café" }, { day: 7, zh: "押", en: "Pawnshop" },
+    { day: 14, zh: "茶餐廳", en: "Teahouse" }, { day: 21, zh: "酒家", en: "Restaurant" },
+  ];
+  const FULL_CITY = 30;
+  const litShare = (n) => (n >= FULL_CITY ? 1 : 0.03 + (0.92 * n) / FULL_CITY);
+  const rng = (seed) => () => { // mulberry32
+    seed = (seed + 0x6d2b79f5) | 0;
+    let x = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+  };
+  const PLANE = `<g class="plane" aria-hidden="true"><path d="M0 9Q3 6 12 6H52Q58 6 61 1H65L63 7L70 8.5L63 10L54 11H36L25 20H18L25 11H12Q3 12 0 9Z"/><circle class="beacon" cx="64" cy="2" r="1.6"/></g>`;
+  const city = ({ w, h, seed, days, text = false }) => {
+    const r = rng(seed), share = litShare(days), parts = [], signs = [];
+    let windows = 0, lit = 0;
+    for (let x = -10; x < w;) { // modern Kowloon towers behind, in the haze
+      const bw = 40 + r() * 60, bh = h * (0.56 + r() * 0.24);
+      parts.push(`<rect class="far" x="${x | 0}" y="${(h - bh) | 0}" width="${bw | 0}" height="${bh | 0}"/>`);
+      x += bw - r() * 12;
+    }
+    for (let x = -4, n = 0; x < w; n++) { // the slab itself: buildings packed with no gaps, near-uniform height
+      const bw = (26 + r() * 36) | 0, bh = (h * (0.5 + r() * 0.17)) | 0, top = h - bh;
+      parts.push(`<rect class="fa${n % 4}" x="${x}" y="${top}" width="${bw}" height="${bh}"/>`);
+      if (r() < 0.55) parts.push(`<rect class="stain" x="${x + ((r() * bw) | 0)}" y="${top}" width="${(2 + r() * 4) | 0}" height="${(bh * (0.3 + r() * 0.6)) | 0}"/>`);
+      for (let wy = top + 7; wy < h - 9; wy += 13) {
+        for (let wx = x + 4; wx < x + bw - 7; wx += 10) {
+          windows++;
+          const on = r() < share, tint = r();
+          if (on) lit++;
+          parts.push(`<rect class="cw${on ? (tint < 0.88 ? " on" : " on2") : ""}" x="${wx}" y="${wy}" width="6" height="8"/>`);
+          const q = r();
+          if (q < 0.04) parts.push(`<rect class="ac" x="${wx - 1}" y="${wy + 9}" width="8" height="3"/>`);
+          else if (q < 0.065) parts.push(`<path class="pole" d="M${wx + 6} ${wy + 4}h10"/><rect class="ld${(q * 997) % 4 | 0}" x="${wx + 8}" y="${wy + 4}" width="3" height="5"/><rect class="ld${(q * 7919) % 4 | 0}" x="${wx + 12}" y="${wy + 4}" width="3" height="4"/>`);
+        }
+      }
+      for (let k = 0, m = (2 + r() * 4) | 0; k < m; k++) { // rooftop forest of TV aerials
+        const ax = (x + 3 + r() * (bw - 6)) | 0, ah = (8 + r() * 22) | 0;
+        parts.push(`<path class="aerial" d="M${ax} ${top}v-${ah}m-6 5h12m-9 5h6"/>`);
+      }
+      if (r() < 0.5) parts.push(`<rect class="tank" x="${(x + bw / 3) | 0}" y="${top - 8}" width="11" height="8"/>`);
+      if (r() < 0.42) signs.push({ x: x + bw - 4, y: (top + 16 + r() * bh * 0.4) | 0 });
+      x += bw - ((r() * 3) | 0);
+    }
+    const signSvg = signs.map((s, i) => {
+      const def = SIGNS[i % SIGNS.length], on = days >= def.day, len = [...def.zh].length, sh = len * 12 + 6;
+      return `<rect class="sg s${i % 3}${on ? " on" : ""}" x="${s.x}" y="${s.y}" width="13" height="${sh}"/>` +
+        (text ? [...def.zh].map((ch, j) => `<text class="sgt${on ? " on" : ""}" x="${s.x + 6.5}" y="${s.y + 13 + j * 12}">${ch}</text>`).join("") : "");
+    }).join("");
+    return { svg: parts.join("") + signSvg + PLANE, windows, lit };
+  };
+  document.getElementById("skyline").innerHTML = city({ w: 1200, h: 240, seed: 1993, days: streak.count }).svg;
   const saveBtn = (s) => `<button type="button" class="save" data-save="${esc(s.id)}" aria-pressed="${!!saved[s.id]}" aria-label="${saved[s.id] ? "Unsave" : "Save"} story: ${esc(s.title)}">
       <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 3.5h12v17l-6-4.2-6 4.2z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></button>`;
   let storyIndex = {}; // id → story, for everything rendered
@@ -500,6 +556,29 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
       }).join("")}</div>`;
   };
 
+  const renderKowloon = () => {
+    const n = streak.count, c = city({ w: 800, h: 373, seed: 1993, days: n, text: true });
+    const pct = Math.round((c.lit / c.windows) * 100);
+    const next = SIGNS.find((s) => s.day > n);
+    const nextLine = next
+      ? `Day ${next.day} switches on the <span lang="zh-Hant" class="zh">${next.zh}</span> ${esc(next.en.toLowerCase())} sign${n < FULL_CITY ? `, and day ${FULL_CITY} lights every window` : ""}.`
+      : n >= FULL_CITY ? "The whole city is lit. Keep your streak going to keep it that way." : `Day ${FULL_CITY} lights every window.`;
+    const steps = [...SIGNS.map((s) => ({ day: s.day, zh: s.zh, en: `${s.en} sign` })), { day: FULL_CITY, zh: "", en: "Every window in the city" }];
+    main.innerHTML = `<div class="page-head"><p class="sign" lang="zh-Hant" aria-hidden="true">九龍</p><div><h1 class="page">Kowloon</h1>
+      <p class="lede">Your reading streak powers this city. Each day in a row you open the briefing, more windows switch on. Miss a day and it goes dark again, back to day 1.</p></div></div>
+      <figure class="scene"><svg class="city" viewBox="0 0 800 373" preserveAspectRatio="xMidYMax slice" role="img" aria-label="The Kowloon Walled City at night, ${c.lit} of ${c.windows} windows lit by your ${n}-day streak">${c.svg}</svg></figure>
+      <div class="power">
+        <p class="power-day"><strong>Day ${n}</strong> <span>${c.lit.toLocaleString("en-CA")} of ${c.windows.toLocaleString("en-CA")} windows lit</span></p>
+        <progress max="${c.windows}" value="${c.lit}" aria-label="Windows lit">${pct}%</progress>
+        <p class="power-next">${nextLine}</p>
+        <p class="power-best">Best streak: ${streak.best} day${streak.best === 1 ? "" : "s"}.</p>
+      </div>
+      <h2 class="ms-h">What your streak switches on</h2>
+      <ol class="milestones">${steps.map((s) => `<li class="${n >= s.day ? "done" : ""}"><span class="ms-day">Day ${s.day}</span>
+        ${s.zh ? `<span class="ms-sign" lang="zh-Hant">${s.zh}</span>` : `<span class="ms-sign ms-all" aria-hidden="true"></span>`}
+        <span>${esc(s.en)}</span><span class="ms-state">${n >= s.day ? "On" : `${s.day - n} day${s.day - n === 1 ? "" : "s"} to go`}</span></li>`).join("")}</ol>`;
+  };
+
   // ── keyboard ─────────────────────────────────────────
   const keysDialog = document.getElementById("keys");
   document.getElementById("keys-btn").addEventListener("click", () => keysDialog.showModal());
@@ -537,6 +616,7 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
       if (VIEW === "archive") return renderArchive(index);
       if (VIEW === "saved") return renderSaved();
       if (VIEW === "tuning") return renderTuning();
+      if (VIEW === "kowloon") return renderKowloon();
       ticker();
       if (SECTION) { markCurrentSection(); renderSection(); } else renderHome();
       if (!DATE) store.set("lastSeen", day.generated_at);
