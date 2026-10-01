@@ -1,0 +1,196 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Daily Briefing configuration. This is the only file you need to edit.
+#  After editing, commit the change; the next run picks it up.
+# ─────────────────────────────────────────────────────────────────────────────
+
+site:
+  title: "Daily Briefing"
+  # Used as the link inside the per-section RSS feeds. Set it to your Pages URL.
+  base_url: "https://YOUR-GITHUB-NAME.github.io/daily-briefing/"
+  timezone: "America/Toronto"
+
+# Honest identification for publishers (SEC EDGAR requires a contact address).
+user_agent: "DailyBriefingBot/1.0 (personal news digest; contact: you@example.com)"
+
+recency_hours: 26          # keep stories published within this many hours
+max_items_per_section: 40  # stories (after de-duplication) shown per section
+top_n: 5                   # "Top 5" size
+retention_days: 90         # older daily files in data/ are deleted
+similarity_threshold: 85   # 0-100; headlines at/above this are the same story
+
+# Fills {city}, {province}, {country} in any Google News query below.
+region:
+  city: "Toronto"
+  province: "Ontario"
+  country: "Canada"
+
+# Keyword rule syntax (case-insensitive, whole words only):
+#   "series a" OR "series b"           quoted phrases, OR
+#   acquisition AND (tech OR software) AND, parentheses
+#   merger AND NOT opinion             NOT
+#   re:raised \$\d+                    regular expression (rest of the rule, or re:"...")
+# AND / OR / NOT must be written in CAPITALS.
+# An item joins a section when ANY line under `keywords` matches,
+# unless ANY line under `exclude` matches.
+# `priority` words weigh 3x in ranking and trigger phone alerts (if ntfy is on).
+# Feeds may set `require_keyword_match: false` to keep everything they publish.
+# A feed can use `query:` instead of `url:` to become a Google News search feed.
+
+sections:
+  finance:
+    name: "Finance"
+    sign: "財經"        # neon signboard text (any short text works)
+    enabled: true
+    keywords:
+      - stocks OR shares OR markets OR "wall street" OR tsx OR "s&p 500" OR nasdaq OR dow
+      - earnings OR revenue OR profit OR guidance OR "quarterly results"
+      - '"series a" OR "series b" OR "series c" OR "seed round" OR funding OR "venture capital"'
+      - acquisition OR acquire OR acquires OR merger OR takeover OR buyout OR "m&a"
+      - ipo OR "initial public offering" OR "goes public" OR listing
+      - '"federal reserve" OR fed OR "bank of canada" OR ecb OR "central bank"'
+      - '"interest rate" OR "rate cut" OR "rate hike" OR rates OR bonds OR yields'
+      - inflation OR cpi OR recession OR gdp OR jobs OR unemployment
+      - re:raised \$\d+
+    exclude:
+      - opinion OR horoscope OR "sponsored content"
+    priority: [acquisition, merger, ipo, "rate cut", "rate hike"]
+    feeds:
+      - { name: "CNBC Top News", type: rss, url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114" }
+      - { name: "CNBC Finance", type: rss, url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000664", require_keyword_match: false }
+      - { name: "MarketWatch", type: rss, url: "https://feeds.content.dowjones.io/public/rss/mw_topstories" }
+      - { name: "Yahoo Finance", type: rss, url: "https://feeds.finance.yahoo.com/rss/2.0/headline?s=%5EGSPC,%5EGSPTSE&region=US&lang=en-US" }
+      - { name: "Financial Post", type: rss, url: "https://financialpost.com/feed" }
+      - { name: "GlobeNewswire", type: rss, url: "https://www.globenewswire.com/RssFeed/orgclass/1/feedTitle/GlobeNewswire%20-%20News%20about%20Public%20Companies" }
+      - { name: "PR Newswire", type: rss, url: "https://www.prnewswire.com/rss/financial-services-latest-news/financial-services-latest-news-list.rss" }
+      - { name: "SEC 8-K filings", type: atom, url: "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=8-K&company=&dateb=&owner=include&start=0&count=40&output=atom", require_keyword_match: false }
+      - { name: "Reuters (via Google News)", type: rss, query: "site:reuters.com business OR markets when:1d" }
+      - { name: "Bloomberg (via Google News)", type: rss, query: "site:bloomberg.com markets when:1d" }
+
+  tech:
+    name: "Tech"
+    sign: "科技"        # neon signboard text (any short text works)
+    enabled: true
+    keywords:
+      - ai OR "artificial intelligence" OR openai OR anthropic OR llm OR chatgpt OR gemini OR nvidia
+      - startup OR startups OR "series a" OR "series b" OR funding OR "venture capital" OR unicorn
+      - apple OR google OR alphabet OR microsoft OR amazon OR meta OR tesla OR "big tech"
+      - launch OR launches OR unveils OR announces OR release OR releases
+      - antitrust OR regulation OR regulators OR "eu commission" OR ftc OR "digital markets act"
+      - breach OR hack OR hacked OR ransomware OR vulnerability OR exploit OR cyberattack OR "data leak"
+      - chip OR chips OR semiconductor OR software OR cloud OR robotics
+    exclude:
+      - deal OR deals OR "gift guide" OR coupon OR "best buy" OR "prime day"
+    priority: [breach, ransomware, acquisition, antitrust]
+    feeds:
+      - { name: "TechCrunch", type: rss, url: "https://techcrunch.com/feed/", require_keyword_match: false }
+      - { name: "The Verge", type: rss, url: "https://www.theverge.com/rss/index.xml" }
+      - { name: "Ars Technica", type: rss, url: "https://feeds.arstechnica.com/arstechnica/index" }
+      - { name: "The Register", type: atom, url: "https://www.theregister.com/headlines.atom" }
+      - { name: "Hacker News", type: rss, url: "https://hnrss.org/frontpage" }
+      - { name: "Wired", type: rss, url: "https://www.wired.com/feed/rss" }
+      - { name: "Krebs on Security", type: rss, url: "https://krebsonsecurity.com/feed/", require_keyword_match: false }
+      - { name: "Reuters Tech (via Google News)", type: rss, query: "site:reuters.com technology when:1d" }
+
+  global:
+    name: "Global Politics"
+    sign: "國際"        # neon signboard text (any short text works)
+    enabled: true
+    keywords:
+      - election OR elections OR vote OR voters OR ballot OR referendum OR campaign
+      - diplomacy OR diplomatic OR summit OR talks OR treaty OR "united nations" OR un OR nato OR "g7" OR "g20"
+      - war OR conflict OR ceasefire OR invasion OR strike OR strikes OR troops OR military OR missile
+      - tariff OR tariffs OR "trade war" OR "trade deal" OR sanctions OR embargo
+      - president OR "prime minister" OR parliament OR congress OR senate OR legislation OR bill OR law
+      - government OR minister OR coup OR protest OR protests
+    exclude:
+      - opinion OR football OR soccer OR cricket OR recipe
+    priority: [ceasefire, invasion, sanctions, coup]
+    feeds:
+      - { name: "BBC World", type: rss, url: "https://feeds.bbci.co.uk/news/world/rss.xml", require_keyword_match: false }
+      - { name: "The Guardian World", type: rss, url: "https://www.theguardian.com/world/rss" }
+      - { name: "Al Jazeera", type: rss, url: "https://www.aljazeera.com/xml/rss/all.xml" }
+      - { name: "NPR World", type: rss, url: "https://feeds.npr.org/1004/rss.xml", require_keyword_match: false }
+      - { name: "Politico", type: rss, url: "https://rss.politico.com/politics.xml" }
+      - { name: "DW World", type: rss, url: "https://rss.dw.com/rdf/rss-en-world" }
+      - { name: "AP (via Google News)", type: rss, query: "site:apnews.com world OR politics when:1d" }
+      - { name: "Reuters World (via Google News)", type: rss, query: "site:reuters.com world when:1d" }
+
+  local:
+    name: "Local Politics"
+    sign: "本地"        # neon signboard text (any short text works)
+    enabled: true
+    keywords:
+      - council OR councillor OR mayor OR "city hall" OR ttc OR transit OR housing OR budget OR bylaw
+      - legislature OR "queen's park" OR premier OR mpp OR ford OR "provincial government" OR ontario
+      - parliament OR "house of commons" OR mp OR "prime minister" OR carney OR poilievre OR ottawa OR federal
+      - election OR byelection OR vote OR policy OR bill OR minister OR government OR police OR tax
+    exclude:
+      - opinion OR "real estate listing" OR "maple leafs" OR raptors OR "blue jays"
+    priority: [byelection, "budget", "state of emergency"]
+    feeds:
+      - { name: "CBC Toronto", type: rss, url: "https://www.cbc.ca/webfeed/rss/rss-canada-toronto" }
+      - { name: "CBC Politics", type: rss, url: "https://www.cbc.ca/webfeed/rss/rss-politics", require_keyword_match: false }
+      - { name: "Global News Toronto", type: rss, url: "https://globalnews.ca/toronto/feed/" }
+      - { name: "Ontario Newsroom", type: rss, url: "https://news.ontario.ca/newsroom/en/rss/allnews.rss", require_keyword_match: false }
+      - { name: "City of Toronto", type: rss, url: "https://www.toronto.ca/news/feed/", require_keyword_match: false }
+      - { name: "{city} city council (via Google News)", type: rss, query: '"{city}" (council OR mayor OR "city hall") when:1d' }
+      - { name: "{province} legislature (via Google News)", type: rss, query: '"{province}" (premier OR legislature OR "Queen''s Park") when:1d' }
+      - { name: "{country} Parliament (via Google News)", type: rss, query: '"{country}" (Parliament OR "House of Commons" OR "prime minister") when:1d' }
+      # HTML scraper example: CP24 has no working RSS, so headlines are read from the page.
+      - name: "CP24"
+        type: html
+        url: "https://www.cp24.com/local/toronto/"
+        selectors:
+          container: "article"
+          title: "h2.c-heading"
+          link: "h2.c-heading a"
+          date: "time"
+          summary: "p"
+# Publisher names. `rename` tidies how a source is shown (left: name as it arrives, right: what you see).
+# Website-style names you don't list (e.g. "toronto.citynews.ca") are shortened automatically ("Citynews").
+# `block` drops a publisher everywhere. Names are matched without regard to capitals.
+sources:
+  rename:
+    "reuters.com": "Reuters"
+    "Bloomberg.com": "Bloomberg"
+    "AP News": "AP"
+    "CNBC Top News": "CNBC"
+    "CNBC Finance": "CNBC"
+    "BBC World": "BBC"
+    "The Guardian World": "The Guardian"
+    "DW World": "DW"
+    "NPR World": "NPR"
+    "Global News Toronto": "Global News"
+    "CBC Toronto": "CBC"
+    "CBC Politics": "CBC"
+    "SEC 8-K filings": "SEC EDGAR"
+    "toronto.citynews.ca": "CityNews Toronto"
+    "thecanadianpressnews.ca": "The Canadian Press"
+    "pm.gc.ca": "Prime Minister of Canada"
+    "taipeitimes.com": "Taipei Times"
+    "edmontonjournal.com": "Edmonton Journal"
+    "aptnnews.ca": "APTN News"
+    "EnergyNow.com": "EnergyNow"
+    "wsws.org": "World Socialist Web Site"
+  block:
+    - "World Socialist Web Site"
+    - "MSN"            # re-publishes other outlets' stories
+
+# Market board in the header: previous close, change, and a 5-day line.
+# `yahoo:` takes any Yahoo Finance symbol; `boc:` takes a Bank of Canada Valet series.
+markets:
+  enabled: true
+  symbols:
+    - { name: "S&P 500", yahoo: "^GSPC" }
+    - { name: "TSX", yahoo: "^GSPTSE" }
+    - { name: "Nasdaq", yahoo: "^IXIC" }
+    - { name: "Oil (WTI)", yahoo: "CL=F" }
+    - { name: "Bitcoin", yahoo: "BTC-USD" }
+    - { name: "USD/CAD", boc: "FXUSDCAD" }
+
+# Optional extras. Each needs secrets (see .env.example / README).
+integrations:
+  google_sheets: false
+  email: false
+  webhook: false   # Slack or Discord
+  ntfy: false
