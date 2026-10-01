@@ -66,7 +66,7 @@ def update_index(today: date, retention_days: int, data_dir: Path = DATA) -> dic
 
 # Chinese characters the UI itself uses; config `sign:` values are added at build time.
 # 九龍 page + the Walled City signboards it lights (SIGNS in app.js)
-UI_CJK = "每日簡報今日檔案收藏調校新星期一二三四五六年月號九龍牙科冰室押茶餐廳酒家士多理髮涼茶麵藥房麻雀金舖影樓"
+UI_CJK = "每日簡報今日檔案收藏調校新星期一二三四五六年月號九龍牙科冰室押茶餐廳酒家士多理髮涼茶麵藥房麻雀金舖影樓城寨小巷魚蛋廠牙醫水井學校廟樓梯天台家電線衙門"
 
 
 def _nav(sections: dict, root: str, archive: bool, current: str) -> str:

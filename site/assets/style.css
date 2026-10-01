@@ -373,6 +373,73 @@ input[type="search"]:focus, select:focus, input[type="date"]:focus { border-colo
 .reg.on .reg-t span { color: var(--up); font-weight: 600; }
 [data-key="kowloon"] { --sec: var(--amber); }
 
+/* ── Kowloon tabs, notes, gate ───────────────────────── */
+.k-tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 1rem; border-bottom: 1px solid var(--line); }
+.k-tabs [role="tab"] { display: flex; align-items: baseline; gap: .5rem; min-height: 44px; padding: .55rem .9rem; font: 600 1.1rem var(--ui);
+  color: var(--muted); background: transparent; border: 0; border-bottom: 3px solid transparent; transition: color .18s, border-color .18s; }
+.k-tabs [role="tab"]:hover { color: var(--ink); }
+.k-tabs [aria-selected="true"] { color: var(--ink); background: var(--panel); border-bottom-color: var(--amber); }
+.k-tabs .zh { color: var(--amber); }
+.k-tabs .locked { opacity: .7; }
+.lock-note { font: 500 .9rem var(--ui); color: var(--muted); }
+.k-note { margin: 0 0 1rem; padding: .6rem .9rem; border-left: 3px solid var(--amber); background: color-mix(in srgb, var(--amber) 8%, transparent); font: 500 1.05rem/1.45 var(--ui); max-width: 60ch; }
+.btn.gate { border-color: var(--amber); color: var(--ink); box-shadow: 0 0 calc(var(--glow) * .8) color-mix(in srgb, var(--amber) 60%, transparent); justify-self: start; }
+
+/* ── Inside the walls: a cutaway block ───────────────── */
+.scene.scene-in { height: auto; background: #050a0b; cursor: default; }
+.scene-in svg { width: 100%; min-width: 760px; height: auto; aspect-ratio: 1200 / 720; }
+.interior .shell { fill: #0a0f10; } .interior .slab { fill: #26302f; }
+.interior .rbg { fill: #101718; stroke: #1d2829; stroke-width: 2; transition: stroke .18s; }
+.interior .room { cursor: pointer; outline: none; }
+.interior .room.open .rbg { fill: url(#glowC); } /* default: a fluorescent tube on the ceiling */
+.interior .room.open .rbg.sky { fill: url(#dusk); }
+.interior .room[data-room="2"].open .rbg, .interior .room[data-room="5"].open .rbg, .interior .room[data-room="6"].open .rbg,
+.interior .room[data-room="9"].open .rbg, .interior .room[data-room="11"].open .rbg { fill: url(#glowW); } /* warm lamp-lit rooms */
+.interior .room:hover .rbg, .interior .room:focus-visible .rbg { stroke: #ffb03a; }
+.interior .room.sel .rbg { stroke: #ffcf7a; stroke-width: 3; }
+.interior .shutter { fill: url(#shut); }
+.interior .rlock { font: 600 16px var(--ui); fill: #9bb3ab; text-anchor: middle; }
+.interior .rlabel { font: 900 20px var(--cjk); fill: #fff; paint-order: stroke; stroke: #0a0f10; stroke-width: 4px; }
+.interior .pipe { stroke: #56645f; stroke-width: 4; fill: none; }
+.interior .tube { fill: #e9fff6; filter: drop-shadow(0 0 6px #bfffe8); animation: buzz 6s steps(1) infinite; }
+.interior .tube:nth-of-type(2n) { animation-duration: 9s; }
+.interior .puddle { fill: #7fe9d62e; }
+.interior .drip { fill: #9fd9ff; animation: drip 2.6s ease-in infinite; }
+@keyframes drip { 0% { transform: translateY(0); opacity: 1; } 80% { opacity: 1; } 100% { transform: translateY(80px); opacity: 0; } }
+.interior .vat { fill: #3a4a4c; } .interior .ball { fill: #e8b44a; }
+.interior .steam { stroke: #ffffff55; stroke-width: 3; fill: none; animation: steam 4s ease-in-out infinite; }
+@keyframes steam { 50% { transform: translateY(-6px); opacity: .5; } }
+.interior .chair { fill: #b3122a; } .interior .lamp { stroke: #9aa8a5; stroke-width: 3; fill: none; }
+.interior .bulb { fill: #fff3cf; filter: drop-shadow(0 0 8px #fff3cf); } .interior .cab { fill: #2c3a3c; }
+.interior .noodle { stroke: #f2e0a6; stroke-width: 3; fill: none; }
+.interior .board-k { fill: #1f3a2c; } .interior .chalk { stroke: #e8f1ec; stroke-width: 2; } .interior .desk { fill: #7a5530; }
+.interior .altar { fill: #8e1b24; } .interior .lantern { fill: #e8283c; filter: drop-shadow(0 0 8px #ff3b4e); }
+.interior .stair { stroke: #7b8f8d; stroke-width: 6; fill: none; }
+.interior .aerial { stroke: #3a4e51; stroke-width: 2; fill: none; } .interior .tank-k { fill: #2a3638; }
+.interior .kite { fill: #ff5fae; stroke: #ff5fae; stroke-width: 1.5; }
+.interior .bed { fill: #4a5a8a; } .interior .tv { fill: #1a2224; stroke: #7fe9d6; stroke-width: 3; filter: drop-shadow(0 0 6px #7fe9d6); }
+.interior .wire { stroke: #3b2f26; stroke-width: 2; fill: none; } .interior .wire:nth-of-type(3n) { stroke: #20282a; }
+.interior .yroof { fill: #2f5d4a; } .interior .ywall { fill: #c9b79c; } .interior .ydoor { fill: #6b2a1f; }
+.interior .inner-plane { fill: #3a4d52; transform: translate(-200px, 0); animation: inner-fly 22s linear infinite; }
+@keyframes inner-fly { 0% { transform: translate(1260px, 26px); } 60%, 100% { transform: translate(-120px, 44px); } }
+.torch { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .3s; background: rgb(1 4 5 / .94);
+  mask-image: radial-gradient(circle 120px at var(--mx, 50%) var(--my, 50%), transparent 0 55%, #000 100%); }
+.torch-on .torch { opacity: 1; }
+
+/* ── Quiz ────────────────────────────────────────────── */
+.quiz { max-width: 40rem; margin: 2rem 0 0; }
+.quiz p { margin: 0 0 .6rem; }
+.q-count { font: 600 1rem var(--ui); color: var(--muted); }
+.q-ask { font: 600 1.3rem/1.35 var(--read); }
+.q-opts { display: grid; gap: .5rem; margin: 0 0 .9rem; }
+.q-opt { min-height: 48px; padding: .6rem .9rem; text-align: left; font: 500 1.1rem var(--ui); color: var(--ink); background: var(--panel);
+  border: 1px solid var(--line); cursor: pointer; transition: border-color .18s, background-color .18s; }
+.q-opt:hover:not(:disabled) { border-color: var(--amber); }
+.q-opt:disabled { cursor: default; }
+.q-opt.right { border-color: var(--up); background: color-mix(in srgb, var(--up) 14%, var(--panel)); }
+.q-opt.wrong { border-color: var(--down); background: color-mix(in srgb, var(--down) 12%, var(--panel)); }
+.q-verdict { font: 700 1.2rem var(--ui); }
+
 /* ── Keyword tuning ──────────────────────────────────── */
 .lede { margin: 0; max-width: 62ch; }
 code { font: 500 .92em var(--led); background: var(--panel-2); border: 1px solid var(--line); padding: 0 .3em; }
@@ -412,4 +479,5 @@ kbd { font: 600 .95rem var(--led); padding: .1rem .4rem; border: 1px solid var(-
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .led { overflow-x: auto; }
   .city .plane { display: none; }
+  .interior .inner-plane { display: none; }
 }

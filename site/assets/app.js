@@ -580,13 +580,135 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
       }).join("")}</div>`;
   };
 
+  // ── Kowloon page: the skyline (days 1–30) and, once the gate opens at 30, inside the walls (another 30) ──
+  const ROOMS = [ // [col, row, colspan] in a 3-column cutaway; row 0 = rooftop, row 4 = ground. day = days past 30.
+    { id: "alley", zh: "小巷", en: "The alleys", day: 0, at: [0, 4, 2],
+      fact: "Sunlight barely reached the ground-floor alleys. Fluorescent tubes lit them day and night, under dripping pipes.",
+      q: ["What lit the Walled City's ground-floor alleys?", ["Fluorescent tubes, day and night", "Sunlight from wide courtyards", "Gas street lamps"]] },
+    { id: "fish", zh: "魚蛋廠", en: "Fish ball factory", day: 2, at: [0, 3, 1],
+      fact: "Small, often unlicensed food factories inside the walls made fish balls sold all over Hong Kong.",
+      q: ["What did many small Walled City factories make?", ["Fish balls and other food", "Cars", "Computer chips"]] },
+    { id: "dentist", zh: "牙醫", en: "Dentist", day: 5, at: [1, 3, 1],
+      fact: "Hong Kong's licensing rules didn't reach inside, so dentists trained in mainland China opened cheap clinics by the dozen.",
+      q: ["Why were there so many dentists in the Walled City?", ["Hong Kong's licensing rules didn't apply there", "It had a dental university", "The government ran free clinics"]] },
+    { id: "well", zh: "水井", en: "The wells", day: 8, at: [2, 3, 1],
+      fact: "Water came from a handful of wells, later joined by government standpipes; pumps pushed it up through a tangle of pipes.",
+      q: ["Where did the Walled City first get its water?", ["A handful of wells inside the walls", "A river through the middle", "Rain tanks on every roof"]] },
+    { id: "noodle", zh: "麵廠", en: "Noodle maker", day: 11, at: [0, 2, 1],
+      fact: "Noodle makers hung fresh noodles to dry wherever air moved: in corridors, at windows, on the rooftops.",
+      q: ["Where did noodle makers dry their noodles?", ["Wherever air moved: corridors, windows, rooftops", "In big electric ovens", "They sold them wet only"]] },
+    { id: "school", zh: "學校", en: "School", day: 14, at: [1, 2, 1],
+      fact: "Churches and charities ran kindergartens and schools inside the walls for the city's thousands of children.",
+      q: ["Who ran many of the schools inside the walls?", ["Churches and charities", "A private university", "Nobody: there were no schools"]] },
+    { id: "temple", zh: "廟", en: "Temple", day: 17, at: [2, 2, 1],
+      fact: "Small temples and household shrines sat between flats and factories; incense smoke mixed with the steam.",
+      q: ["What sat between the flats and factories?", ["Small temples and household shrines", "Shopping malls", "Car parks"]] },
+    { id: "stairs", zh: "樓梯", en: "Stairwells", day: 20, at: [0, 1, 1],
+      fact: "Buildings grew into each other, so you could cross much of the city through linked stairwells and corridors without touching the ground.",
+      q: ["How could people cross the city without going outside?", ["Through linked stairwells and corridors", "On an underground train", "By cable car"]] },
+    { id: "roof", zh: "天台", en: "The rooftops", day: 23, at: [0, 0, 3],
+      fact: "Buildings topped out around 14 storeys, the limit for planes landing at Kai Tak. Children played on the roofs beneath the jets.",
+      q: ["Why did buildings stop at about 14 storeys?", ["Planes landing at Kai Tak airport needed the height limit", "The ground was too soft", "Lifts were banned"]] },
+    { id: "home", zh: "家", en: "A family flat", day: 26, at: [1, 1, 1],
+      fact: "Around 33,000 people lived on 2.6 hectares, often a whole family in a single small room.",
+      q: ["About how many people lived in the Walled City?", ["Around 33,000", "Around 3,000", "Around 300,000"]] },
+    { id: "wires", zh: "電線", en: "The wiring", day: 28, at: [2, 1, 1],
+      fact: "Electric wires and water pipes snaked across every ceiling, many of them unofficial connections.",
+      q: ["What covered the ceilings of the corridors?", ["Tangles of wires and water pipes", "Painted murals", "Glass skylights"]] },
+    { id: "yamen", zh: "衙門", en: "The Yamen", day: 30, at: [2, 4, 1],
+      fact: "The old Yamen, a Qing dynasty government office, was the only building kept when the city was demolished in 1993–94. It still stands in Kowloon Walled City Park.",
+      q: ["Which building survived the 1993–94 demolition?", ["The Yamen, a Qing government office", "The tallest tower", "None of them"]] },
+  ];
+  const ROW_Y = [16, 150, 294, 438, 582], ROW_H = [120, 130, 130, 130, 130];
+  const cell = ([col, row, span]) => ({ x: 20 + col * 390, y: ROW_Y[row], w: span * 390 - 12, h: ROW_H[row] });
+  const props = (id, { x, y, w, h }) => { // a few shapes per room: enough to read, not a painting
+    const b = y + h; // floor line
+    switch (id) {
+      case "alley": return `<path class="pipe" d="M${x} ${y + 18}H${x + w}M${x} ${y + 28}H${x + w * 0.7}q10 0 10 10v20"/>` +
+        [0.2, 0.5, 0.8].map((f) => `<rect class="tube" x="${x + w * f - 30}" y="${y + 40}" width="60" height="5"/>`).join("") +
+        `<ellipse class="puddle" cx="${x + w * 0.35}" cy="${b - 8}" rx="60" ry="5"/><ellipse class="puddle" cx="${x + w * 0.75}" cy="${b - 10}" rx="40" ry="4"/>` +
+        [0.3, 0.62].map((f, i) => `<circle class="drip" style="animation-delay:${i * 1.3}s" cx="${x + w * f}" cy="${y + 32}" r="2.5"/>`).join("");
+      case "fish": return [0, 1, 2].map((i) => `<rect class="vat" x="${x + 30 + i * 105}" y="${b - 55}" width="80" height="50" rx="6"/><circle class="ball" cx="${x + 70 + i * 105}" cy="${b - 58}" r="7"/>`).join("") +
+        `<path class="steam" d="M${x + 70} ${b - 70}q-8 -12 0 -24q8 -12 0 -24M${x + 280} ${b - 70}q-8 -12 0 -24"/>`;
+      case "dentist": return `<path class="chair" d="M${x + 120} ${b - 10}v-30h90l30 -40h14l-24 46v24z"/><path class="lamp" d="M${x + 250} ${y + 20}v30l-20 20"/><circle class="bulb" cx="${x + 228}" cy="${y + 72}" r="9"/>` +
+        `<rect class="cab" x="${x + 30}" y="${b - 70}" width="50" height="60"/>`;
+      case "well": return `<rect class="cab" x="${x + 40}" y="${b - 40}" width="90" height="30" rx="4"/><path class="pipe" d="M${x + 85} ${b - 40}V${y + 20}H${x + w - 20}M${x + 150} ${y + 20}v60h120v-40"/>` +
+        `<circle class="drip" cx="${x + 230}" cy="${y + 84}" r="2.5"/><circle class="drip" style="animation-delay:1s" cx="${x + 300}" cy="${y + 26}" r="2.5"/>`;
+      case "noodle": return [...Array(9)].map((_, i) => `<path class="noodle" d="M${x + 40 + i * 32} ${y + 22}q4 30 0 60q-4 15 0 30"/>`).join("") +
+        `<path class="pipe" d="M${x + 20} ${y + 22}H${x + w - 20}"/>`;
+      case "school": return `<rect class="board-k" x="${x + 40}" y="${y + 20}" width="160" height="60"/>` +
+        [0, 1, 2].map((i) => `<rect class="desk" x="${x + 210 + i * 45}" y="${b - 34}" width="34" height="8"/><rect class="desk" x="${x + 214 + i * 45}" y="${b - 26}" width="4" height="22"/>`).join("") +
+        `<path class="chalk" d="M${x + 55} ${y + 40}h50M${x + 55} ${y + 55}h90M${x + 55} ${y + 68}h30"/>`;
+      case "temple": return `<rect class="altar" x="${x + 120}" y="${b - 50}" width="130" height="44"/>` +
+        [0.25, 0.75].map((f) => `<ellipse class="lantern" cx="${x + w * f}" cy="${y + 40}" rx="16" ry="20"/>`).join("") +
+        `<path class="steam" d="M${x + 185} ${b - 52}q-10 -15 0 -30q10 -15 0 -30"/>`;
+      case "stairs": return `<path class="stair" d="M${x + 30} ${b - 6}h40v-20h40v-20h40v-20h40v-20h40v-20h40"/>`;
+      case "roof": return [...Array(16)].map((_, i) => `<path class="aerial" d="M${x + 40 + i * 70} ${b}v-${30 + (i * 37) % 40}m-8 6h16m-12 6h8"/>`).join("") +
+        `<rect class="tank-k" x="${x + 300}" y="${b - 34}" width="40" height="34"/><rect class="tank-k" x="${x + 780}" y="${b - 30}" width="34" height="30"/>` +
+        `<path class="kite" d="M${x + 560} ${y + 30}l14 14l-14 14l-14 -14zM${x + 560} ${y + 58}q10 20 -6 40"/>` +
+        `<g class="plane inner-plane"><path d="M0 9Q3 6 12 6H52Q58 6 61 1H65L63 7L70 8.5L63 10L54 11H36L25 20H18L25 11H12Q3 12 0 9Z"/></g>`;
+      case "home": return `<rect class="bed" x="${x + 30}" y="${b - 36}" width="120" height="30"/><rect class="cab" x="${x + 200}" y="${b - 80}" width="40" height="74"/>` +
+        `<rect class="tv" x="${x + 270}" y="${b - 52}" width="50" height="38" rx="4"/><path class="pipe" d="M${x + 20} ${y + 20}h330"/>`;
+      case "wires": return [...Array(7)].map((_, i) => `<path class="wire" d="M${x} ${y + 20 + i * 6}q${w / 2} ${30 + i * 6} ${w} ${-4 + (i % 3) * 8}"/>`).join("") +
+        `<rect class="cab" x="${x + 260}" y="${b - 60}" width="60" height="54"/>`;
+      case "yamen": return `<path class="yroof" d="M${x + 40} ${y + 60}q${(w - 80) / 2} -30 ${w - 80} 0l-20 14H${x + 60}z"/>` +
+        `<rect class="ywall" x="${x + 70}" y="${y + 74}" width="${w - 140}" height="${h - 80}"/><rect class="ydoor" x="${x + w / 2 - 22}" y="${b - 46}" width="44" height="40"/>`;
+    }
+    return "";
+  };
+  const interior = (days) => {
+    const out = [`<defs><pattern id="shut" width="8" height="9" patternUnits="userSpaceOnUse"><rect width="8" height="9" fill="#2a3436"/><rect y="7" width="8" height="2" fill="#151d1f"/></pattern><radialGradient id="glowC" cx=".5" cy="0" r="1.1"><stop offset="0" stop-color="#3b6a5e"/><stop offset=".6" stop-color="#1a2b28"/><stop offset="1" stop-color="#0f1716"/></radialGradient><radialGradient id="glowW" cx=".5" cy="0" r="1.1"><stop offset="0" stop-color="#6b4a24"/><stop offset=".6" stop-color="#2a2016"/><stop offset="1" stop-color="#14100c"/></radialGradient><linearGradient id="dusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b1430"/><stop offset=".7" stop-color="#5a2f45"/><stop offset="1" stop-color="#b4553a"/></linearGradient></defs><rect class="shell" x="0" y="0" width="1200" height="720"/>`];
+    for (const y of ROW_Y.slice(1)) out.push(`<rect class="slab" x="10" y="${y - 12}" width="1180" height="10"/>`);
+    ROOMS.forEach((r, k) => {
+      const c = cell(r.at), open = days >= r.day;
+      out.push(`<g class="room${open ? " open" : ""}" data-room="${k}" tabindex="0" role="button" aria-label="${esc(`${r.zh} ${r.en}, ${open ? "open" : `opens at day ${30 + r.day}`}`)}">` +
+        `<rect class="rbg${r.id === "roof" ? " sky" : ""}" x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}"/>` +
+        (open ? props(r.id, c) + `<text class="rlabel" x="${c.x + 12}" y="${c.y + c.h - 12}">${r.zh}</text>`
+          : `<rect class="shutter" x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}"/>` +
+            `<text class="rlock" x="${c.x + c.w / 2}" y="${c.y + c.h / 2 + 6}">Day ${30 + r.day}</text>`) + `</g>`);
+    });
+    return { svg: out.join(""), open: ROOMS.filter((r) => days >= r.day).length };
+  };
+
+  // one set of window listeners for drag-to-pan, whichever scene is on screen
+  let pan = null, panMoved = false;
+  addEventListener("pointermove", (e) => {
+    if (!pan) return;
+    if (Math.abs(e.clientX - pan.x) > 4) { panMoved = true; pan.el.classList.add("dragging"); }
+    pan.el.scrollLeft = pan.left - (e.clientX - pan.x);
+  });
+  addEventListener("pointerup", () => { if (pan) pan.el.classList.remove("dragging"); pan = null; });
+  const pannable = (el) => el.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "mouse") { pan = { el, x: e.clientX, left: el.scrollLeft }; panMoved = false; }
+  });
+  const zhSpan = (s) => `<span lang="zh-Hant" class="zh">${s}</span>`;
+  const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+
   const renderKowloon = () => {
+    const unlocked = streak.best >= FULL_CITY, inside = location.hash === "#inside";
+    main.innerHTML = `<div class="page-head"><p class="sign" lang="zh-Hant" aria-hidden="true">${inside ? "城寨" : "九龍"}</p><div><h1 class="page">${inside ? "Inside the walls" : "Kowloon"}</h1>
+      <p class="lede">${inside
+        ? "The Kowloon Walled City from the inside: a block cut open from the alleys to the rooftops. Every day in a row past day 30 opens another room. Tap a room to learn what happened there."
+        : "Your reading streak powers this city. Each day in a row you open the briefing, more windows and signs switch on. Miss a day and it goes dark again, back to day 1."}</p></div></div>
+      <div class="k-tabs" role="tablist" aria-label="Kowloon views">
+        <button type="button" role="tab" data-go="" aria-selected="${!inside}">${zhSpan("九龍")} The skyline</button>
+        <button type="button" role="tab" data-go="#inside" aria-selected="${inside}" class="${unlocked ? "" : "locked"}">${zhSpan("城寨")} Inside the walls
+          ${unlocked ? "" : `<span class="lock-note">opens at day ${FULL_CITY}</span>`}</button>
+      </div>
+      <div id="k-body"></div>`;
+    main.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => {
+      history.replaceState(null, "", b.dataset.go || location.pathname);
+      renderKowloon();
+    }));
+    (inside ? renderInside : renderOutside)(document.getElementById("k-body"), unlocked);
+  };
+  addEventListener("hashchange", () => VIEW === "kowloon" && renderKowloon());
+
+  const renderOutside = (body, unlocked) => {
     const mine = Math.max(1, streak.count);
-    const state = { days: mine, time: "night", rain: false, flipped: 0 };
-    const flipText = () => (state.flipped ? `You flipped ${state.flipped} light${state.flipped === 1 ? "" : "s"} by hand. They reset when the city redraws.` : "");
-    const zhSpan = (s) => `<span lang="zh-Hant" class="zh">${s}</span>`;
-    main.innerHTML = `<div class="page-head"><p class="sign" lang="zh-Hant" aria-hidden="true">九龍</p><div><h1 class="page">Kowloon</h1>
-      <p class="lede">Your reading streak powers this city. Each day in a row you open the briefing, more windows and signs switch on. Miss a day and it goes dark again, back to day 1.</p></div></div>
+    const state = { days: mine, flipped: 0 };
+    const flipText = () => (state.flipped ? `You flipped ${plural(state.flipped, "light")} by hand. They reset when the city redraws.` : "");
+    body.innerHTML = `
       <div class="k-controls" role="group" aria-label="City controls">
         <label class="k-field k-preview">Preview a streak: <strong id="k-day-label"></strong>
           <input type="range" id="k-day" min="1" max="${FULL_CITY}" step="1" value="${Math.min(mine, FULL_CITY)}"></label>
@@ -626,8 +748,10 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
         <p class="power-day"><strong>Day ${state.days}</strong> <span>${c.lit.toLocaleString("en-CA")} of ${c.windows.toLocaleString("en-CA")} windows, ${c.signsOn} of ${SIGNS.length} signs</span></p>
         <progress max="${c.windows}" value="${c.lit}" aria-label="Windows lit"></progress>
         <p class="power-next">${next ? `Day ${next.day} switches on the ${zhSpan(next.zh)} ${esc(next.en.toLowerCase())} sign.` : "Every window and sign in the city is on."}</p>
-        <p class="power-best">${preview ? `Previewing. Your real streak is day ${mine}.` : `Best streak: ${streak.best} day${streak.best === 1 ? "" : "s"}.`}</p>
-        <p class="power-best" id="k-flips">${flipText()}</p>`;
+        <p class="power-best">${preview ? `Previewing. Your real streak is day ${mine}.` : `Best streak: ${plural(streak.best, "day")}.`}</p>
+        <p class="power-best" id="k-flips">${flipText()}</p>
+        ${unlocked ? `<button type="button" class="btn gate" data-go-inside>The gate is open: go inside the walls</button>`
+          : `<p class="power-best">At day ${FULL_CITY} the gate opens and you can go inside the Walled City.</p>`}`;
       document.getElementById("k-reg").innerHTML = SIGNS.map((d, k) => `<li><button type="button" class="reg${state.days >= d.day ? " on" : ""}" data-reg="${k}">
         <span class="sc-sign sc-c${d.c}${state.days >= d.day ? " on" : ""}" lang="zh-Hant" aria-hidden="true">${d.zh}</span>
         <span class="reg-t"><strong>${esc(d.en)}</strong><span>${state.days >= d.day ? "On" : `Day ${d.day}`}</span></span></button></li>`).join("");
@@ -635,21 +759,19 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
     draw();
     card(0);
     scene.scrollLeft = (scene.scrollWidth - scene.clientWidth) / 2;
+    pannable(scene);
 
-    // controls
     const day = document.getElementById("k-day");
     day.addEventListener("input", () => { state.days = +day.value; draw(); });
     document.getElementById("k-mine").addEventListener("click", () => { state.days = mine; day.value = Math.min(mine, FULL_CITY); draw(); });
-    main.querySelectorAll("[data-time]").forEach((b) => b.addEventListener("click", () => {
-      state.time = b.dataset.time;
+    body.querySelectorAll("[data-time]").forEach((b) => b.addEventListener("click", () => {
       scene.classList.remove("t-dusk", "t-night", "t-dawn");
-      scene.classList.add(`t-${state.time}`);
-      main.querySelectorAll("[data-time]").forEach((x) => x.setAttribute("aria-pressed", x === b));
+      scene.classList.add(`t-${b.dataset.time}`);
+      body.querySelectorAll("[data-time]").forEach((x) => x.setAttribute("aria-pressed", x === b));
     }));
-    main.querySelectorAll("[data-rain]").forEach((b) => b.addEventListener("click", () => {
-      state.rain = b.dataset.rain === "1";
-      document.getElementById("k-wrap").classList.toggle("raining", state.rain);
-      main.querySelectorAll("[data-rain]").forEach((x) => x.setAttribute("aria-pressed", x === b));
+    body.querySelectorAll("[data-rain]").forEach((b) => b.addEventListener("click", () => {
+      document.getElementById("k-wrap").classList.toggle("raining", b.dataset.rain === "1");
+      body.querySelectorAll("[data-rain]").forEach((x) => x.setAttribute("aria-pressed", x === b));
     }));
     document.getElementById("k-plane").addEventListener("click", () => {
       const plane = svg.querySelector(".plane");
@@ -658,23 +780,24 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
       plane.classList.add("landing");
       toast("Kai Tak approach: jets passed so low over Kowloon that people on the roofs could read the airline names.");
     });
-
-    // drag to pan (touch already scrolls natively); a drag never counts as a tap
-    let drag = null, moved = false;
-    scene.addEventListener("pointerdown", (e) => { if (e.pointerType === "mouse") { drag = { x: e.clientX, left: scene.scrollLeft }; moved = false; } });
-    addEventListener("pointermove", (e) => {
-      if (!drag) return;
-      if (Math.abs(e.clientX - drag.x) > 4) { moved = true; scene.classList.add("dragging"); }
-      scene.scrollLeft = drag.left - (e.clientX - drag.x);
+    body.addEventListener("click", (e) => {
+      if (e.target.closest("[data-go-inside]")) { location.hash = "inside"; return; }
+      const b = e.target.closest("[data-reg]");
+      if (!b) return;
+      const k = +b.dataset.reg, el = svg.querySelector(`.sgn[data-sign="${k}"]`);
+      card(k);
+      if (el) {
+        const box = el.getBoundingClientRect(), sb = scene.getBoundingClientRect();
+        scene.scrollTo({ left: scene.scrollLeft + box.left - sb.left - sb.width / 2, behavior: reduceMotion ? "auto" : "smooth" });
+        scene.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
+        pulse(el);
+      }
     });
-    addEventListener("pointerup", () => { drag = null; scene.classList.remove("dragging"); });
-
-    // taps: signs open their card, windows flip
-    const pick = (el) => { card(+el.dataset.sign); el.classList.remove("pulse"); void el.getBoundingClientRect(); el.classList.add("pulse"); };
+    const pulse = (el) => { el.classList.remove("pulse"); void el.getBoundingClientRect(); el.classList.add("pulse"); };
     svg.addEventListener("click", (e) => {
-      if (moved) { moved = false; return; }
+      if (panMoved) { panMoved = false; return; }
       const sign = e.target.closest(".sgn");
-      if (sign) return pick(sign);
+      if (sign) { card(+sign.dataset.sign); return pulse(sign); }
       const win = e.target.closest(".cw");
       if (win) {
         win.classList.toggle("on");
@@ -685,21 +808,140 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
     });
     svg.addEventListener("keydown", (e) => {
       const sign = e.target.closest?.(".sgn");
-      if (sign && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); pick(sign); }
+      if (sign && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); card(+sign.dataset.sign); pulse(sign); }
     });
-    // registry: show the card and bring the first matching sign into view
-    document.getElementById("k-reg").addEventListener("click", (e) => {
-      const b = e.target.closest("[data-reg]");
-      if (!b) return;
-      const k = +b.dataset.reg, el = svg.querySelector(`.sgn[data-sign="${k}"]`);
+  };
+
+  const renderInside = (body, unlocked) => {
+    const mine = Math.max(0, Math.min(FULL_CITY, streak.count - FULL_CITY)); // days past 30, this streak
+    const state = { days: unlocked ? mine : ROOMS[3].day, torch: false };
+    body.innerHTML = `
+      ${unlocked ? (streak.count < FULL_CITY ? `<p class="k-note">Your streak reset to day ${streak.count}, so the rooms are dark again. They reopen one by one from day ${FULL_CITY + 1}.</p>` : "")
+        : `<p class="k-note">You're peeking. The gate opens for real when your streak reaches day ${FULL_CITY} (you're on day ${Math.max(1, streak.count)}). Until then this is a preview.</p>`}
+      <div class="k-controls" role="group" aria-label="Inside controls">
+        <label class="k-field k-preview">${unlocked ? "Preview days inside" : "Preview"}: <strong id="i-day-label"></strong>
+          <input type="range" id="i-day" min="0" max="${FULL_CITY}" step="1" value="${state.days}"></label>
+        ${unlocked ? `<button type="button" class="btn" id="i-mine">Back to my streak</button>` : ""}
+        <button type="button" class="btn" id="i-torch" aria-pressed="false">Torch</button>
+      </div>
+      <div class="scene-wrap inside" id="i-wrap"><div class="scene scene-in" id="i-scene"><svg class="interior" id="i-svg" viewBox="0 0 1200 720" role="img"></svg></div><div class="torch" aria-hidden="true"></div></div>
+      <p class="k-hint">Tap a room to learn about it. Turn on the torch and move your finger or mouse to explore in the dark.</p>
+      <div class="k-below">
+        <aside class="sign-card" id="i-card" aria-live="polite"></aside>
+        <div class="power" id="i-power"></div>
+      </div>
+      <h2 class="ms-h">Rooms</h2>
+      <ul class="registry" id="i-reg"></ul>
+      <section class="quiz" aria-labelledby="quiz-h"><h2 class="ms-h" id="quiz-h">Walled City quiz</h2><div id="quiz"></div></section>`;
+
+    const svg = document.getElementById("i-svg"), wrap = document.getElementById("i-wrap"), scene = document.getElementById("i-scene");
+    const card = (k) => {
+      const r = ROOMS[k], open = state.days >= r.day;
+      document.getElementById("i-card").innerHTML = `<p class="sc-sign sc-c2${open ? " on" : ""}" lang="zh-Hant" aria-hidden="true">${r.zh}</p>
+        <div><h3>${zhSpan(r.zh)} ${esc(r.en)}</h3><p class="sc-state">${open ? "Open" : `Opens at day ${FULL_CITY + r.day}`}</p><p>${open ? esc(r.fact) : "The shutter is down. Keep your streak going to open it."}</p></div>`;
+    };
+    const draw = () => {
+      const c = interior(state.days);
+      svg.innerHTML = c.svg;
+      svg.setAttribute("aria-label", `Cutaway of a Walled City block, ${c.open} of ${ROOMS.length} rooms open`);
+      const preview = !unlocked || state.days !== mine;
+      document.getElementById("i-day-label").textContent = `day ${FULL_CITY + state.days}${preview ? " (preview)" : ", your streak"}`;
+      const mineBtn = document.getElementById("i-mine");
+      if (mineBtn) mineBtn.hidden = !preview;
+      const next = ROOMS.find((r) => r.day > state.days);
+      document.getElementById("i-power").innerHTML = `
+        <p class="power-day"><strong>Day ${FULL_CITY + state.days}</strong> <span>${c.open} of ${ROOMS.length} rooms open</span></p>
+        <progress max="${ROOMS.length}" value="${c.open}" aria-label="Rooms open"></progress>
+        <p class="power-next">${next ? `Day ${FULL_CITY + next.day} opens ${zhSpan(next.zh)} ${esc(next.en.toLowerCase())}.` : "Every room is open. You've seen the whole Walled City."}</p>
+        <p class="power-best">${preview ? "Previewing." : `Best streak: ${plural(streak.best, "day")}.`} Quiz best: ${store.get("quizBest", 0)} of ${QUIZ_LEN}.</p>`;
+      document.getElementById("i-reg").innerHTML = ROOMS.map((r, k) => `<li><button type="button" class="reg${state.days >= r.day ? " on" : ""}" data-room-reg="${k}">
+        <span class="sc-sign sc-c2${state.days >= r.day ? " on" : ""}" lang="zh-Hant" aria-hidden="true">${r.zh}</span>
+        <span class="reg-t"><strong>${esc(r.en)}</strong><span>${state.days >= r.day ? "Open" : `Day ${FULL_CITY + r.day}`}</span></span></button></li>`).join("");
+      quizReset();
+    };
+
+    // torch: everything dark except a circle around the pointer
+    document.getElementById("i-torch").addEventListener("click", (e) => {
+      state.torch = !state.torch;
+      e.currentTarget.setAttribute("aria-pressed", state.torch);
+      wrap.classList.toggle("torch-on", state.torch);
+    });
+    wrap.addEventListener("pointermove", (e) => {
+      const b = wrap.getBoundingClientRect();
+      wrap.style.setProperty("--mx", `${e.clientX - b.left}px`);
+      wrap.style.setProperty("--my", `${e.clientY - b.top}px`);
+    });
+    pannable(scene);
+
+    const pick = (k) => {
       card(k);
-      if (el) {
-        const box = el.getBoundingClientRect(), sb = scene.getBoundingClientRect();
-        scene.scrollTo({ left: scene.scrollLeft + box.left - sb.left - sb.width / 2, behavior: reduceMotion ? "auto" : "smooth" });
-        scene.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
-        pick(el);
-      }
+      svg.querySelectorAll(".room.sel").forEach((x) => x.classList.remove("sel"));
+      svg.querySelector(`[data-room="${k}"]`)?.classList.add("sel");
+    };
+    svg.addEventListener("click", (e) => {
+      if (panMoved) { panMoved = false; return; }
+      const r = e.target.closest(".room");
+      if (r) pick(+r.dataset.room);
     });
+    svg.addEventListener("keydown", (e) => {
+      const r = e.target.closest?.(".room");
+      if (r && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); pick(+r.dataset.room); }
+    });
+    document.getElementById("i-reg").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-room-reg]");
+      if (!b) return;
+      pick(+b.dataset.roomReg);
+      wrap.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
+    });
+    const day = document.getElementById("i-day");
+    day.addEventListener("input", () => { state.days = +day.value; draw(); });
+    document.getElementById("i-mine")?.addEventListener("click", () => { state.days = mine; day.value = mine; draw(); });
+
+    // quiz: questions come from open rooms only, so it grows as you go deeper
+    const QUIZ_LEN = 5;
+    const quiz = document.getElementById("quiz");
+    let q = null;
+    const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+    function quizReset() {
+      const pool = ROOMS.filter((r) => state.days >= r.day);
+      if (pool.length < 3) {
+        quiz.innerHTML = `<p class="empty-note">Open 3 rooms to start the quiz (${pool.length} open now). Each room you open adds a question.</p>`;
+        return;
+      }
+      quiz.innerHTML = `<p>${plural(Math.min(QUIZ_LEN, pool.length), "question")} from the ${plural(pool.length, "room")} you've opened.</p><button type="button" class="btn" id="quiz-go">Start the quiz</button>`;
+      document.getElementById("quiz-go").addEventListener("click", () => {
+        q = { list: shuffle([...pool]).slice(0, QUIZ_LEN), i: 0, score: 0 };
+        ask();
+      });
+    }
+    const ask = () => {
+      const r = q.list[q.i], [prompt, opts] = r.q;
+      const order = shuffle(opts.map((o, i) => ({ o, right: i === 0 })));
+      quiz.innerHTML = `<p class="q-count">Question ${q.i + 1} of ${q.list.length}</p><p class="q-ask">${esc(prompt)}</p>
+        <div class="q-opts">${order.map((x, i) => `<button type="button" class="q-opt" data-right="${x.right}">${esc(x.o)}</button>`).join("")}</div>
+        <div class="q-after" aria-live="polite"></div>`;
+      quiz.querySelectorAll(".q-opt").forEach((b) => b.addEventListener("click", () => {
+        const right = b.dataset.right === "true";
+        if (right) { q.score++; navigator.vibrate?.(15); }
+        quiz.querySelectorAll(".q-opt").forEach((x) => { x.disabled = true; x.classList.toggle("right", x.dataset.right === "true"); });
+        if (!right) b.classList.add("wrong");
+        const last = q.i === q.list.length - 1;
+        quiz.querySelector(".q-after").innerHTML = `<p class="q-verdict ${right ? "up" : "down"}">${right ? "Correct." : "Not quite."}</p><p>${zhSpan(r.zh)} ${esc(r.fact)}</p>
+          <button type="button" class="btn" id="q-next">${last ? "See your score" : "Next question"}</button>`;
+        document.getElementById("q-next").focus();
+        document.getElementById("q-next").addEventListener("click", () => (last ? finish() : (q.i++, ask())));
+      }));
+    };
+    const finish = () => {
+      const best = Math.max(store.get("quizBest", 0), q.score);
+      store.set("quizBest", best);
+      quiz.innerHTML = `<p class="q-ask">You got ${q.score} of ${q.list.length}.</p><p>${q.score === q.list.length ? "A perfect run. You know the Walled City." : "Tap a room above to read its story, then try again."} Best: ${best} of ${QUIZ_LEN}.</p>
+        <button type="button" class="btn" id="quiz-again">Try again</button>`;
+      document.getElementById("quiz-again").addEventListener("click", quizReset);
+    };
+
+    draw();
+    pick(0);
   };
 
   // ── keyboard ─────────────────────────────────────────
