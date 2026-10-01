@@ -6,7 +6,7 @@
 site:
   title: "Daily Briefing"
   # Used as the link inside the per-section RSS feeds. Set it to your Pages URL.
-  base_url: "https://asleepky13.github.io/daily-briefing/"
+  base_url: "https://YOUR-GITHUB-NAME.github.io/daily-briefing/"
   timezone: "America/Toronto"
 
 # Honest identification for publishers (SEC EDGAR requires a contact address).

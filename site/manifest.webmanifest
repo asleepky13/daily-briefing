@@ -1,0 +1,11 @@
+{
+  "name": "Daily Briefing 每日簡報",
+  "short_name": "Briefing",
+  "description": "Morning headlines in finance, tech, global and local politics.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0e1719",
+  "theme_color": "#0e1719",
+  "icons": [{ "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

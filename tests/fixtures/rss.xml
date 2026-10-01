@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel>
+<title>Example Wire</title><link>https://example.com/</link><description>Test feed</description>
+<item>
+  <title>Acme Corp agrees to acquisition by Globex for $2 billion</title>
+  <link>https://example.com/news/acme-globex/?utm_source=rss&amp;utm_medium=feed</link>
+  <description>&lt;p&gt;The &lt;b&gt;merger&lt;/b&gt; creates the largest widget maker &amp;amp; ends a long bidding war.&lt;/p&gt;</description>
+  <pubDate>Wed, 30 Sep 2026 12:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Central bank holds interest rates steady</title>
+  <link>https://example.com/news/rates</link>
+  <description>Policymakers held the key rate at 3%.</description>
+  <pubDate>Wed, 30 Sep 2026 09:30:00 -0400</pubDate>
+</item>
+<item>
+  <title>Missing link item is skipped</title>
+</item>
+</channel></rss>

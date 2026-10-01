@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{TITLE}}</title>
+<meta name="description" content="Morning headlines in finance, tech, global and local politics, collected from public news feeds.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0e1719">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="manifest" href="{{ROOT}}manifest.webmanifest">
+<link rel="icon" href="{{ROOT}}assets/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,600&family=DotGothic16&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@900&text={{CJK}}&display=block">
+<link rel="stylesheet" href="{{ROOT}}assets/style.css">
+<link rel="preload" href="{{ROOT}}data/index.json" as="fetch" crossorigin>
+{{FEEDS}}
+</head>
+<body data-root="{{ROOT}}" data-view="{{VIEW}}" data-section="{{SECTION}}" data-date="{{DATE}}" data-latest="{{LATEST}}">
+<a class="skip" href="#main">Skip to stories</a>
+
+<header class="mast">
+  <div class="rain" aria-hidden="true"></div>
+  <div class="mast-inner">
+    <a class="sign-v" href="{{ROOT}}" aria-label="{{SITE_TITLE}}, today">
+      <span lang="zh-Hant" aria-hidden="true"><b>每</b><b>日</b><b>簡</b><b>報</b></span>
+    </a>
+    <div class="mast-body">
+      <p class="brand"><a href="{{ROOT}}">{{SITE_TITLE}}</a></p>
+      <p class="hud" id="hud" aria-live="polite">Loading today's briefing…</p>
+    </div>
+    <div class="tools">
+      <span class="streak" id="streak" hidden></span>
+      <button class="icon-btn" type="button" id="keys-btn" aria-label="Keyboard shortcuts" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6 9.5h1.5M9.5 9.5H11M13 9.5h1.5M16.5 9.5H18M6 12.5h1.5M16.5 12.5H18M8.5 15h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <button class="icon-btn" type="button" id="theme" aria-label="Switch colour theme">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></svg>
+      </button>
+    </div>
+  </div>
+  <section class="board" id="board" aria-labelledby="board-label" hidden></section>
+  <nav aria-label="Sections"><ul>
+{{NAV}}
+  </ul></nav>
+</header>
+
+<div class="led" id="ticker" hidden></div>
+
+<main id="main" tabindex="-1">
+  <noscript><p class="empty">This briefing needs JavaScript to show stories. Each section is also available as an RSS feed.</p></noscript>
+  <div class="skeleton" aria-hidden="true"><i></i><i></i><i></i></div>
+</main>
+
+<footer class="foot">
+  <p id="health"></p>
+  <p>Headlines and snippets belong to their original publishers. Every story links to the source.</p>
+  <p>Follow by RSS: <span id="rss-links"></span></p>
+  <p><a href="{{ROOT}}tuning/">Keyword tuning</a>: see which keywords bring stories in, and which add noise.</p>
+  <p id="markets-note" hidden>Market data: Yahoo Finance (indexes, oil, Bitcoin) and Bank of Canada (USD/CAD), previous close. Not investment advice.</p>
+</footer>
+
+<dialog id="keys" aria-labelledby="keys-title">
+  <h2 id="keys-title">Keyboard shortcuts</h2>
+  <dl>
+    <dt><kbd>/</kbd></dt><dd>Search</dd>
+    <dt><kbd>j</kbd> <kbd>k</kbd></dt><dd>Next / previous story</dd>
+    <dt><kbd>o</kbd></dt><dd>Open the selected story</dd>
+    <dt><kbd>s</kbd></dt><dd>Save or unsave the selected story</dd>
+    <dt><kbd>1</kbd>–<kbd>4</kbd></dt><dd>Jump to a section</dd>
+    <dt><kbd>t</kbd></dt><dd>Switch light / dark</dd>
+    <dt><kbd>?</kbd></dt><dd>Show this list</dd>
+  </dl>
+  <form method="dialog"><button class="btn" type="submit">Close</button></form>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="{{ROOT}}assets/app.js" defer></script>
+</body>
+</html>
