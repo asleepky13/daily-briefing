@@ -1,0 +1,83 @@
+name: Daily briefing
+
+on:
+  schedule:
+    # GitHub cron is UTC. 11:30 UTC = 7:30 Toronto in summer (EDT); 12:30 UTC = 7:30 in winter (EST).
+    # Both fire every day; pipeline/main.py skips the one that isn't 7:30 locally.
+    - cron: "30 11 * * *"
+    - cron: "30 12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: daily-briefing
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      skipped: ${{ steps.run.outputs.skipped }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Restore HTTP cache (ETag / Last-Modified)
+        uses: actions/cache@v4
+        with:
+          path: .cache/http
+          key: http-cache-${{ github.run_id }}
+          restore-keys: http-cache-
+
+      - name: Fetch, filter and build
+        id: run
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python -m pipeline.main
+
+      - name: Commit data
+        if: steps.run.outputs.skipped != 'true'
+        run: |
+          git config user.name "daily-briefing-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data
+          if git diff --cached --quiet; then echo "No data changes"; exit 0; fi
+          git commit -m "Briefing $(TZ=America/Toronto date +%F)"
+          for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep 5; done
+          exit 1
+
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.run.outputs.skipped != 'true'
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.skipped != 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
