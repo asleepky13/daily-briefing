@@ -88,9 +88,20 @@
   // ── the Walled City: a seeded skyline whose lights follow the streak ──
   // Each window draws its own random number once (fixed seed), and is lit when it falls under the streak's share,
   // so a longer streak only ever adds lights: the same windows stay on day after day.
-  const SIGNS = [ // hanging signboards the Walled City was known for, switched on at these streak days
-    { day: 1, zh: "牙科", en: "Dentist" }, { day: 3, zh: "冰室", en: "Ice café" }, { day: 7, zh: "押", en: "Pawnshop" },
-    { day: 14, zh: "茶餐廳", en: "Teahouse" }, { day: 21, zh: "酒家", en: "Restaurant" },
+  const SIGNS = [ // businesses the Walled City was known for; each switches on at its streak day
+    { day: 1, zh: "牙科", en: "Dentist", c: 0, shape: "v", fact: "Unlicensed dentists and doctors crowded the Walled City's edges, where Hong Kong's licensing rules didn't reach." },
+    { day: 2, zh: "士多", en: "Corner store", c: 4, shape: "h", fact: "士多 is borrowed from the English word “store”: tiny shops selling soft drinks, cigarettes and snacks." },
+    { day: 3, zh: "冰室", en: "Ice café", c: 1, shape: "v", fact: "Before the cha chaan teng, the bing sutt served iced drinks, milk tea and pineapple buns." },
+    { day: 5, zh: "理髮", en: "Barber", c: 5, shape: "v", fact: "Barbers worked out of single rooms, a chair and a mirror wedged between staircases." },
+    { day: 7, zh: "押", en: "Pawnshop", c: 2, shape: "box", fact: "Hong Kong pawnshops hang a 押 sign, traditionally shaped like a bat holding a coin, for good fortune." },
+    { day: 9, zh: "涼茶", en: "Herbal tea", c: 1, shape: "h", fact: "Bitter herbal teas sold by the bowl, meant to cool the body's “inner heat” on humid nights." },
+    { day: 11, zh: "麵家", en: "Noodle shop", c: 2, shape: "v", fact: "Small factories in the Walled City made fish balls and noodles for restaurants across Kowloon." },
+    { day: 14, zh: "茶餐廳", en: "Teahouse", c: 0, shape: "v", fact: "The Hong Kong café: silk-stocking milk tea, French toast and macaroni soup, fast and cheap." },
+    { day: 17, zh: "藥房", en: "Pharmacy", c: 4, shape: "h", fact: "Pharmacies sold Western medicine on one shelf and dried herbs and tiger balm on the next." },
+    { day: 21, zh: "酒家", en: "Restaurant", c: 3, shape: "v", fact: "Cantonese restaurants: dim sum carts in the morning, wedding banquets at night." },
+    { day: 24, zh: "麻雀", en: "Mahjong parlour", c: 3, shape: "v2", fact: "The clatter of mahjong tiles carried through the alleys long after midnight." },
+    { day: 27, zh: "金舖", en: "Goldsmith", c: 2, shape: "h", fact: "Goldsmiths sold the heavy gold bangles given at weddings and births." },
+    { day: 30, zh: "影樓", en: "Photo studio", c: 5, shape: "v", fact: "Portrait studios with painted backdrops took wedding and family photos." },
   ];
   const FULL_CITY = 30;
   const litShare = (n) => (n >= FULL_CITY ? 1 : 0.03 + (0.92 * n) / FULL_CITY);
@@ -101,8 +112,15 @@
     return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
   };
   const PLANE = `<g class="plane" aria-hidden="true"><path d="M0 9Q3 6 12 6H52Q58 6 61 1H65L63 7L70 8.5L63 10L54 11H36L25 20H18L25 11H12Q3 12 0 9Z"/><circle class="beacon" cx="64" cy="2" r="1.6"/></g>`;
+  const signShape = (def, x, y) => { // returns [width, height, char positions]
+    const ch = [...def.zh], n = ch.length;
+    if (def.shape === "h") return [n * 12 + 6, 16, ch.map((c, j) => [c, x + 9 + j * 12, y + 12])];
+    if (def.shape === "box") return [20, 20, [[ch[0], x + 10, y + 15]]];
+    if (def.shape === "v2") return [26, 30, ch.map((c, j) => [c, x + 7 + j * 12, y + 19])];
+    return [13, n * 12 + 6, ch.map((c, j) => [c, x + 6.5, y + 13 + j * 12])];
+  };
   const city = ({ w, h, seed, days, text = false }) => {
-    const r = rng(seed), share = litShare(days), parts = [], signs = [];
+    const r = rng(seed), share = litShare(days), parts = [], spots = [];
     let windows = 0, lit = 0;
     for (let x = -10; x < w;) { // modern Kowloon towers behind, in the haze
       const bw = 40 + r() * 60, bh = h * (0.56 + r() * 0.24);
@@ -129,15 +147,21 @@
         parts.push(`<path class="aerial" d="M${ax} ${top}v-${ah}m-6 5h12m-9 5h6"/>`);
       }
       if (r() < 0.5) parts.push(`<rect class="tank" x="${(x + bw / 3) | 0}" y="${top - 8}" width="11" height="8"/>`);
-      if (r() < 0.42) signs.push({ x: x + bw - 4, y: (top + 16 + r() * bh * 0.4) | 0 });
+      if (r() < 0.6) spots.push({ x, bw, y: (top + 14 + r() * bh * 0.45) | 0 });
       x += bw - ((r() * 3) | 0);
     }
-    const signSvg = signs.map((s, i) => {
-      const def = SIGNS[i % SIGNS.length], on = days >= def.day, len = [...def.zh].length, sh = len * 12 + 6;
-      return `<rect class="sg s${i % 3}${on ? " on" : ""}" x="${s.x}" y="${s.y}" width="13" height="${sh}"/>` +
-        (text ? [...def.zh].map((ch, j) => `<text class="sgt${on ? " on" : ""}" x="${s.x + 6.5}" y="${s.y + 13 + j * 12}">${ch}</text>`).join("") : "");
+    const signSvg = spots.map((s, i) => {
+      const k = i % SIGNS.length, def = SIGNS[k], on = days >= def.day;
+      const sx = def.shape === "v" ? s.x + s.bw - 4 : s.x + 3; // vertical boards jut from the corner; others hang flat
+      const [sw, sh, chars] = signShape(def, sx, s.y);
+      const flick = on && i % 5 === 2 ? " flicker" : "";
+      const label = `${def.zh} ${def.en} sign, ${on ? "on" : `switches on at day ${def.day}`}`;
+      return `<g class="sgn${on ? " on" : ""}${flick}" data-sign="${k}"${text ? ` tabindex="0" role="button" aria-label="${esc(label)}"` : ""}>` +
+        `<rect class="sg c${def.c}" x="${sx}" y="${s.y}" width="${sw}" height="${sh}" rx="${def.shape === "box" ? 10 : 1.5}"/>` +
+        (text ? chars.map(([c, cx, cy]) => `<text class="sgt" x="${cx}" y="${cy}">${c}</text>`).join("") +
+          `<rect class="hit" x="${sx - 10}" y="${s.y - 12}" width="${sw + 20}" height="${sh + 24}"/>` : "") + `</g>`;
     }).join("");
-    return { svg: parts.join("") + signSvg + PLANE, windows, lit };
+    return { svg: parts.join("") + signSvg + PLANE, windows, lit, signsOn: SIGNS.filter((d) => days >= d.day).length };
   };
   document.getElementById("skyline").innerHTML = city({ w: 1200, h: 240, seed: 1993, days: streak.count }).svg;
   const saveBtn = (s) => `<button type="button" class="save" data-save="${esc(s.id)}" aria-pressed="${!!saved[s.id]}" aria-label="${saved[s.id] ? "Unsave" : "Save"} story: ${esc(s.title)}">
@@ -557,26 +581,125 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
   };
 
   const renderKowloon = () => {
-    const n = streak.count, c = city({ w: 800, h: 373, seed: 1993, days: n, text: true });
-    const pct = Math.round((c.lit / c.windows) * 100);
-    const next = SIGNS.find((s) => s.day > n);
-    const nextLine = next
-      ? `Day ${next.day} switches on the <span lang="zh-Hant" class="zh">${next.zh}</span> ${esc(next.en.toLowerCase())} sign${n < FULL_CITY ? `, and day ${FULL_CITY} lights every window` : ""}.`
-      : n >= FULL_CITY ? "The whole city is lit. Keep your streak going to keep it that way." : `Day ${FULL_CITY} lights every window.`;
-    const steps = [...SIGNS.map((s) => ({ day: s.day, zh: s.zh, en: `${s.en} sign` })), { day: FULL_CITY, zh: "", en: "Every window in the city" }];
+    const mine = Math.max(1, streak.count);
+    const state = { days: mine, time: "night", rain: false, flipped: 0 };
+    const flipText = () => (state.flipped ? `You flipped ${state.flipped} light${state.flipped === 1 ? "" : "s"} by hand. They reset when the city redraws.` : "");
+    const zhSpan = (s) => `<span lang="zh-Hant" class="zh">${s}</span>`;
     main.innerHTML = `<div class="page-head"><p class="sign" lang="zh-Hant" aria-hidden="true">九龍</p><div><h1 class="page">Kowloon</h1>
-      <p class="lede">Your reading streak powers this city. Each day in a row you open the briefing, more windows switch on. Miss a day and it goes dark again, back to day 1.</p></div></div>
-      <figure class="scene"><svg class="city" viewBox="0 0 800 373" preserveAspectRatio="xMidYMax slice" role="img" aria-label="The Kowloon Walled City at night, ${c.lit} of ${c.windows} windows lit by your ${n}-day streak">${c.svg}</svg></figure>
-      <div class="power">
-        <p class="power-day"><strong>Day ${n}</strong> <span>${c.lit.toLocaleString("en-CA")} of ${c.windows.toLocaleString("en-CA")} windows lit</span></p>
-        <progress max="${c.windows}" value="${c.lit}" aria-label="Windows lit">${pct}%</progress>
-        <p class="power-next">${nextLine}</p>
-        <p class="power-best">Best streak: ${streak.best} day${streak.best === 1 ? "" : "s"}.</p>
+      <p class="lede">Your reading streak powers this city. Each day in a row you open the briefing, more windows and signs switch on. Miss a day and it goes dark again, back to day 1.</p></div></div>
+      <div class="k-controls" role="group" aria-label="City controls">
+        <label class="k-field k-preview">Preview a streak: <strong id="k-day-label"></strong>
+          <input type="range" id="k-day" min="1" max="${FULL_CITY}" step="1" value="${Math.min(mine, FULL_CITY)}"></label>
+        <button type="button" class="btn" id="k-mine">Back to my streak (day ${mine})</button>
+        <div class="k-field"><span id="k-time-l">Time of day</span>
+          <div class="seg" role="group" aria-labelledby="k-time-l">${["dusk", "night", "dawn"].map((t) =>
+            `<button type="button" data-time="${t}" aria-pressed="${t === "night"}">${t === "night" ? "Midnight" : t[0].toUpperCase() + t.slice(1)}</button>`).join("")}</div></div>
+        <div class="k-field"><span id="k-wx-l">Weather</span>
+          <div class="seg" role="group" aria-labelledby="k-wx-l"><button type="button" data-rain="0" aria-pressed="true">Clear</button><button type="button" data-rain="1" aria-pressed="false">Rain</button></div></div>
+        <button type="button" class="btn" id="k-plane">Land a plane</button>
       </div>
-      <h2 class="ms-h">What your streak switches on</h2>
-      <ol class="milestones">${steps.map((s) => `<li class="${n >= s.day ? "done" : ""}"><span class="ms-day">Day ${s.day}</span>
-        ${s.zh ? `<span class="ms-sign" lang="zh-Hant">${s.zh}</span>` : `<span class="ms-sign ms-all" aria-hidden="true"></span>`}
-        <span>${esc(s.en)}</span><span class="ms-state">${n >= s.day ? "On" : `${s.day - n} day${s.day - n === 1 ? "" : "s"} to go`}</span></li>`).join("")}</ol>`;
+      <div class="scene-wrap" id="k-wrap"><div class="scene t-night" id="k-scene"><svg class="city" id="k-city" viewBox="0 0 1600 420" preserveAspectRatio="xMidYMax meet" role="img"></svg></div><div class="rain" aria-hidden="true"></div></div>
+      <p class="k-hint">Drag or swipe to look around. Tap a sign to read about it, or tap a window to flip its light.</p>
+      <div class="k-below">
+        <aside class="sign-card" id="k-card" aria-live="polite"></aside>
+        <div class="power" id="k-power"></div>
+      </div>
+      <h2 class="ms-h">Signs on the street</h2>
+      <ul class="registry" id="k-reg"></ul>`;
+
+    const scene = document.getElementById("k-scene"), svg = document.getElementById("k-city");
+    const card = (k) => {
+      const d = SIGNS[k], on = state.days >= d.day;
+      document.getElementById("k-card").innerHTML = `<p class="sc-sign sc-c${d.c}${on ? " on" : ""}" lang="zh-Hant" aria-hidden="true">${d.zh}</p>
+        <div><h3>${zhSpan(d.zh)} ${esc(d.en)}</h3><p class="sc-state">${on ? "Switched on" : `Switches on at day ${d.day}`}</p><p>${esc(d.fact)}</p></div>`;
+    };
+    const draw = () => {
+      const c = city({ w: 1600, h: 420, seed: 1993, days: state.days, text: true });
+      svg.innerHTML = c.svg;
+      svg.style.setProperty("--fly-from", "1700px");
+      svg.setAttribute("aria-label", `The Kowloon Walled City, ${c.lit} of ${c.windows} windows and ${c.signsOn} of ${SIGNS.length} signs lit at day ${state.days}`);
+      const preview = state.days !== mine;
+      document.getElementById("k-day-label").textContent = `day ${state.days}${preview ? " (preview)" : ", your streak"}`;
+      document.getElementById("k-mine").hidden = !preview;
+      const next = SIGNS.find((s) => s.day > state.days);
+      document.getElementById("k-power").innerHTML = `
+        <p class="power-day"><strong>Day ${state.days}</strong> <span>${c.lit.toLocaleString("en-CA")} of ${c.windows.toLocaleString("en-CA")} windows, ${c.signsOn} of ${SIGNS.length} signs</span></p>
+        <progress max="${c.windows}" value="${c.lit}" aria-label="Windows lit"></progress>
+        <p class="power-next">${next ? `Day ${next.day} switches on the ${zhSpan(next.zh)} ${esc(next.en.toLowerCase())} sign.` : "Every window and sign in the city is on."}</p>
+        <p class="power-best">${preview ? `Previewing. Your real streak is day ${mine}.` : `Best streak: ${streak.best} day${streak.best === 1 ? "" : "s"}.`}</p>
+        <p class="power-best" id="k-flips">${flipText()}</p>`;
+      document.getElementById("k-reg").innerHTML = SIGNS.map((d, k) => `<li><button type="button" class="reg${state.days >= d.day ? " on" : ""}" data-reg="${k}">
+        <span class="sc-sign sc-c${d.c}${state.days >= d.day ? " on" : ""}" lang="zh-Hant" aria-hidden="true">${d.zh}</span>
+        <span class="reg-t"><strong>${esc(d.en)}</strong><span>${state.days >= d.day ? "On" : `Day ${d.day}`}</span></span></button></li>`).join("");
+    };
+    draw();
+    card(0);
+    scene.scrollLeft = (scene.scrollWidth - scene.clientWidth) / 2;
+
+    // controls
+    const day = document.getElementById("k-day");
+    day.addEventListener("input", () => { state.days = +day.value; draw(); });
+    document.getElementById("k-mine").addEventListener("click", () => { state.days = mine; day.value = Math.min(mine, FULL_CITY); draw(); });
+    main.querySelectorAll("[data-time]").forEach((b) => b.addEventListener("click", () => {
+      state.time = b.dataset.time;
+      scene.classList.remove("t-dusk", "t-night", "t-dawn");
+      scene.classList.add(`t-${state.time}`);
+      main.querySelectorAll("[data-time]").forEach((x) => x.setAttribute("aria-pressed", x === b));
+    }));
+    main.querySelectorAll("[data-rain]").forEach((b) => b.addEventListener("click", () => {
+      state.rain = b.dataset.rain === "1";
+      document.getElementById("k-wrap").classList.toggle("raining", state.rain);
+      main.querySelectorAll("[data-rain]").forEach((x) => x.setAttribute("aria-pressed", x === b));
+    }));
+    document.getElementById("k-plane").addEventListener("click", () => {
+      const plane = svg.querySelector(".plane");
+      plane.classList.remove("landing");
+      void plane.getBoundingClientRect(); // restart the animation
+      plane.classList.add("landing");
+      toast("Kai Tak approach: jets passed so low over Kowloon that people on the roofs could read the airline names.");
+    });
+
+    // drag to pan (touch already scrolls natively); a drag never counts as a tap
+    let drag = null, moved = false;
+    scene.addEventListener("pointerdown", (e) => { if (e.pointerType === "mouse") { drag = { x: e.clientX, left: scene.scrollLeft }; moved = false; } });
+    addEventListener("pointermove", (e) => {
+      if (!drag) return;
+      if (Math.abs(e.clientX - drag.x) > 4) { moved = true; scene.classList.add("dragging"); }
+      scene.scrollLeft = drag.left - (e.clientX - drag.x);
+    });
+    addEventListener("pointerup", () => { drag = null; scene.classList.remove("dragging"); });
+
+    // taps: signs open their card, windows flip
+    const pick = (el) => { card(+el.dataset.sign); el.classList.remove("pulse"); void el.getBoundingClientRect(); el.classList.add("pulse"); };
+    svg.addEventListener("click", (e) => {
+      if (moved) { moved = false; return; }
+      const sign = e.target.closest(".sgn");
+      if (sign) return pick(sign);
+      const win = e.target.closest(".cw");
+      if (win) {
+        win.classList.toggle("on");
+        win.classList.remove("on2");
+        state.flipped++;
+        document.getElementById("k-flips").textContent = flipText();
+      }
+    });
+    svg.addEventListener("keydown", (e) => {
+      const sign = e.target.closest?.(".sgn");
+      if (sign && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); pick(sign); }
+    });
+    // registry: show the card and bring the first matching sign into view
+    document.getElementById("k-reg").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-reg]");
+      if (!b) return;
+      const k = +b.dataset.reg, el = svg.querySelector(`.sgn[data-sign="${k}"]`);
+      card(k);
+      if (el) {
+        const box = el.getBoundingClientRect(), sb = scene.getBoundingClientRect();
+        scene.scrollTo({ left: scene.scrollLeft + box.left - sb.left - sb.width / 2, behavior: reduceMotion ? "auto" : "smooth" });
+        scene.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
+        pick(el);
+      }
+    });
   };
 
   // ── keyboard ─────────────────────────────────────────
