@@ -168,6 +168,7 @@ def test_recency_window():
     ("30 11 * * *", datetime(2026, 1, 5, 11, 30, tzinfo=timezone.utc), False),  # EST: 6:30
     ("30 12 * * *", datetime(2026, 1, 5, 12, 45, tzinfo=timezone.utc), True),   # EST: 7:45 (late cron still runs)
     (None, datetime(2026, 1, 5, 3, 0, tzinfo=timezone.utc), True),              # manual run
+    ("30 5,11,17,23 * * *", datetime(2026, 1, 5, 5, 30, tzinfo=timezone.utc), True),  # every-6h cron, no guard
 ])
 def test_dst_guard(schedule, now, ok):
     assert should_run(schedule, now, "America/Toronto") is ok

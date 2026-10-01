@@ -2,10 +2,8 @@ name: Daily briefing
 
 on:
   schedule:
-    # GitHub cron is UTC. 11:30 UTC = 7:30 Toronto in summer (EDT); 12:30 UTC = 7:30 in winter (EST).
-    # Both fire every day; pipeline/main.py skips the one that isn't 7:30 locally.
-    - cron: "30 11 * * *"
-    - cron: "30 12 * * *"
+    # Every 6 hours (UTC): 1:30, 7:30, 13:30, 19:30 Toronto in summer; an hour earlier in winter.
+    - cron: "30 5,11,17,23 * * *"
   workflow_dispatch:
 
 permissions:

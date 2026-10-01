@@ -40,7 +40,7 @@ def should_run(schedule: str | None, now: datetime, tz: str) -> bool:
     if not schedule:  # manual / local run
         return True
     offset = now.astimezone(ZoneInfo(tz)).utcoffset().total_seconds() / 3600
-    return SCHEDULES.get(schedule.strip()) == offset
+    return SCHEDULES.get(schedule.strip(), offset) == offset  # crons not listed here always run
 
 
 def health_table(results: list[FetchResult]) -> str:
