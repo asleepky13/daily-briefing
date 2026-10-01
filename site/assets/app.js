@@ -583,91 +583,282 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
   // ── Kowloon page: the skyline (days 1–30) and, once the gate opens at 30, inside the walls (another 30) ──
   const ROOMS = [ // [col, row, colspan] in a 3-column cutaway; row 0 = rooftop, row 4 = ground. day = days past 30.
     { id: "alley", zh: "小巷", en: "The alleys", day: 0, at: [0, 4, 2],
-      fact: "Sunlight barely reached the ground-floor alleys. Fluorescent tubes lit them day and night, under dripping pipes.",
-      q: ["What lit the Walled City's ground-floor alleys?", ["Fluorescent tubes, day and night", "Sunlight from wide courtyards", "Gas street lamps"]] },
+      fact: "Sunlight barely reached the ground-floor alleys. Fluorescent tubes lit them day and night, under dripping pipes and sagging wires." },
     { id: "fish", zh: "魚蛋廠", en: "Fish ball factory", day: 2, at: [0, 3, 1],
-      fact: "Small, often unlicensed food factories inside the walls made fish balls sold all over Hong Kong.",
-      q: ["What did many small Walled City factories make?", ["Fish balls and other food", "Cars", "Computer chips"]] },
+      fact: "Small, often unlicensed food factories inside the walls made fish balls sold all over Hong Kong." },
     { id: "dentist", zh: "牙醫", en: "Dentist", day: 5, at: [1, 3, 1],
-      fact: "Hong Kong's licensing rules didn't reach inside, so dentists trained in mainland China opened cheap clinics by the dozen.",
-      q: ["Why were there so many dentists in the Walled City?", ["Hong Kong's licensing rules didn't apply there", "It had a dental university", "The government ran free clinics"]] },
+      fact: "Hong Kong's licensing rules didn't reach inside, so dentists trained in mainland China opened cheap clinics by the dozen." },
     { id: "well", zh: "水井", en: "The wells", day: 8, at: [2, 3, 1],
-      fact: "Water came from a handful of wells, later joined by government standpipes; pumps pushed it up through a tangle of pipes.",
-      q: ["Where did the Walled City first get its water?", ["A handful of wells inside the walls", "A river through the middle", "Rain tanks on every roof"]] },
+      fact: "Water came from a handful of wells, later joined by government standpipes; pumps pushed it up through a tangle of pipes." },
     { id: "noodle", zh: "麵廠", en: "Noodle maker", day: 11, at: [0, 2, 1],
-      fact: "Noodle makers hung fresh noodles to dry wherever air moved: in corridors, at windows, on the rooftops.",
-      q: ["Where did noodle makers dry their noodles?", ["Wherever air moved: corridors, windows, rooftops", "In big electric ovens", "They sold them wet only"]] },
+      fact: "Noodle makers hung fresh noodles to dry wherever air moved: in corridors, at windows, on the rooftops." },
     { id: "school", zh: "學校", en: "School", day: 14, at: [1, 2, 1],
-      fact: "Churches and charities ran kindergartens and schools inside the walls for the city's thousands of children.",
-      q: ["Who ran many of the schools inside the walls?", ["Churches and charities", "A private university", "Nobody: there were no schools"]] },
+      fact: "Churches and charities ran kindergartens and schools inside the walls for the city's thousands of children." },
     { id: "temple", zh: "廟", en: "Temple", day: 17, at: [2, 2, 1],
-      fact: "Small temples and household shrines sat between flats and factories; incense smoke mixed with the steam.",
-      q: ["What sat between the flats and factories?", ["Small temples and household shrines", "Shopping malls", "Car parks"]] },
+      fact: "Small temples and household shrines sat between flats and factories; incense coils smouldered for days overhead." },
     { id: "stairs", zh: "樓梯", en: "Stairwells", day: 20, at: [0, 1, 1],
-      fact: "Buildings grew into each other, so you could cross much of the city through linked stairwells and corridors without touching the ground.",
-      q: ["How could people cross the city without going outside?", ["Through linked stairwells and corridors", "On an underground train", "By cable car"]] },
+      fact: "Buildings grew into each other, so you could cross much of the city through linked stairwells and corridors without touching the ground." },
     { id: "roof", zh: "天台", en: "The rooftops", day: 23, at: [0, 0, 3],
-      fact: "Buildings topped out around 14 storeys, the limit for planes landing at Kai Tak. Children played on the roofs beneath the jets.",
-      q: ["Why did buildings stop at about 14 storeys?", ["Planes landing at Kai Tak airport needed the height limit", "The ground was too soft", "Lifts were banned"]] },
+      fact: "Buildings topped out around 14 storeys, the limit for planes landing at Kai Tak. Children played and flew kites on the roofs beneath the jets." },
     { id: "home", zh: "家", en: "A family flat", day: 26, at: [1, 1, 1],
-      fact: "Around 33,000 people lived on 2.6 hectares, often a whole family in a single small room.",
-      q: ["About how many people lived in the Walled City?", ["Around 33,000", "Around 3,000", "Around 300,000"]] },
+      fact: "Around 33,000 people lived on 2.6 hectares, often a whole family in a single small room." },
     { id: "wires", zh: "電線", en: "The wiring", day: 28, at: [2, 1, 1],
-      fact: "Electric wires and water pipes snaked across every ceiling, many of them unofficial connections.",
-      q: ["What covered the ceilings of the corridors?", ["Tangles of wires and water pipes", "Painted murals", "Glass skylights"]] },
+      fact: "Electric wires and water pipes snaked across every ceiling, many of them unofficial connections tapped off the meters." },
     { id: "yamen", zh: "衙門", en: "The Yamen", day: 30, at: [2, 4, 1],
-      fact: "The old Yamen, a Qing dynasty government office, was the only building kept when the city was demolished in 1993–94. It still stands in Kowloon Walled City Park.",
-      q: ["Which building survived the 1993–94 demolition?", ["The Yamen, a Qing government office", "The tallest tower", "None of them"]] },
+      fact: "The old Yamen, a Qing dynasty government office, was the only building kept when the city was demolished in 1993–94. It still stands in Kowloon Walled City Park." },
   ];
-  const ROW_Y = [16, 150, 294, 438, 582], ROW_H = [120, 130, 130, 130, 130];
-  const cell = ([col, row, span]) => ({ x: 20 + col * 390, y: ROW_Y[row], w: span * 390 - 12, h: ROW_H[row] });
-  const props = (id, { x, y, w, h }) => { // a few shapes per room: enough to read, not a painting
-    const b = y + h; // floor line
-    switch (id) {
-      case "alley": return `<path class="pipe" d="M${x} ${y + 18}H${x + w}M${x} ${y + 28}H${x + w * 0.7}q10 0 10 10v20"/>` +
-        [0.2, 0.5, 0.8].map((f) => `<rect class="tube" x="${x + w * f - 30}" y="${y + 40}" width="60" height="5"/>`).join("") +
-        `<ellipse class="puddle" cx="${x + w * 0.35}" cy="${b - 8}" rx="60" ry="5"/><ellipse class="puddle" cx="${x + w * 0.75}" cy="${b - 10}" rx="40" ry="4"/>` +
-        [0.3, 0.62].map((f, i) => `<circle class="drip" style="animation-delay:${i * 1.3}s" cx="${x + w * f}" cy="${y + 32}" r="2.5"/>`).join("");
-      case "fish": return [0, 1, 2].map((i) => `<rect class="vat" x="${x + 30 + i * 105}" y="${b - 55}" width="80" height="50" rx="6"/><circle class="ball" cx="${x + 70 + i * 105}" cy="${b - 58}" r="7"/>`).join("") +
-        `<path class="steam" d="M${x + 70} ${b - 70}q-8 -12 0 -24q8 -12 0 -24M${x + 280} ${b - 70}q-8 -12 0 -24"/>`;
-      case "dentist": return `<path class="chair" d="M${x + 120} ${b - 10}v-30h90l30 -40h14l-24 46v24z"/><path class="lamp" d="M${x + 250} ${y + 20}v30l-20 20"/><circle class="bulb" cx="${x + 228}" cy="${y + 72}" r="9"/>` +
-        `<rect class="cab" x="${x + 30}" y="${b - 70}" width="50" height="60"/>`;
-      case "well": return `<rect class="cab" x="${x + 40}" y="${b - 40}" width="90" height="30" rx="4"/><path class="pipe" d="M${x + 85} ${b - 40}V${y + 20}H${x + w - 20}M${x + 150} ${y + 20}v60h120v-40"/>` +
-        `<circle class="drip" cx="${x + 230}" cy="${y + 84}" r="2.5"/><circle class="drip" style="animation-delay:1s" cx="${x + 300}" cy="${y + 26}" r="2.5"/>`;
-      case "noodle": return [...Array(9)].map((_, i) => `<path class="noodle" d="M${x + 40 + i * 32} ${y + 22}q4 30 0 60q-4 15 0 30"/>`).join("") +
-        `<path class="pipe" d="M${x + 20} ${y + 22}H${x + w - 20}"/>`;
-      case "school": return `<rect class="board-k" x="${x + 40}" y="${y + 20}" width="160" height="60"/>` +
-        [0, 1, 2].map((i) => `<rect class="desk" x="${x + 210 + i * 45}" y="${b - 34}" width="34" height="8"/><rect class="desk" x="${x + 214 + i * 45}" y="${b - 26}" width="4" height="22"/>`).join("") +
-        `<path class="chalk" d="M${x + 55} ${y + 40}h50M${x + 55} ${y + 55}h90M${x + 55} ${y + 68}h30"/>`;
-      case "temple": return `<rect class="altar" x="${x + 120}" y="${b - 50}" width="130" height="44"/>` +
-        [0.25, 0.75].map((f) => `<ellipse class="lantern" cx="${x + w * f}" cy="${y + 40}" rx="16" ry="20"/>`).join("") +
-        `<path class="steam" d="M${x + 185} ${b - 52}q-10 -15 0 -30q10 -15 0 -30"/>`;
-      case "stairs": return `<path class="stair" d="M${x + 30} ${b - 6}h40v-20h40v-20h40v-20h40v-20h40v-20h40"/>`;
-      case "roof": return [...Array(16)].map((_, i) => `<path class="aerial" d="M${x + 40 + i * 70} ${b}v-${30 + (i * 37) % 40}m-8 6h16m-12 6h8"/>`).join("") +
-        `<rect class="tank-k" x="${x + 300}" y="${b - 34}" width="40" height="34"/><rect class="tank-k" x="${x + 780}" y="${b - 30}" width="34" height="30"/>` +
-        `<path class="kite" d="M${x + 560} ${y + 30}l14 14l-14 14l-14 -14zM${x + 560} ${y + 58}q10 20 -6 40"/>` +
-        `<g class="plane inner-plane"><path d="M0 9Q3 6 12 6H52Q58 6 61 1H65L63 7L70 8.5L63 10L54 11H36L25 20H18L25 11H12Q3 12 0 9Z"/></g>`;
-      case "home": return `<rect class="bed" x="${x + 30}" y="${b - 36}" width="120" height="30"/><rect class="cab" x="${x + 200}" y="${b - 80}" width="40" height="74"/>` +
-        `<rect class="tv" x="${x + 270}" y="${b - 52}" width="50" height="38" rx="4"/><path class="pipe" d="M${x + 20} ${y + 20}h330"/>`;
-      case "wires": return [...Array(7)].map((_, i) => `<path class="wire" d="M${x} ${y + 20 + i * 6}q${w / 2} ${30 + i * 6} ${w} ${-4 + (i % 3) * 8}"/>`).join("") +
-        `<rect class="cab" x="${x + 260}" y="${b - 60}" width="60" height="54"/>`;
-      case "yamen": return `<path class="yroof" d="M${x + 40} ${y + 60}q${(w - 80) / 2} -30 ${w - 80} 0l-20 14H${x + 60}z"/>` +
-        `<rect class="ywall" x="${x + 70}" y="${y + 74}" width="${w - 140}" height="${h - 80}"/><rect class="ydoor" x="${x + w / 2 - 22}" y="${b - 46}" width="44" height="40"/>`;
-    }
-    return "";
+
+  // ── pixel-art cutaway: a 400×244 canvas scaled up with crisp pixels ──
+  const PW = 400, PH = 244, ROW_Y = [4, 45, 92, 139, 186], ROW_H = [38, 44, 44, 44, 44];
+  const cell = ([col, row, span]) => ({ x: 4 + col * 132, y: ROW_Y[row], w: span * 132 - 4, h: ROW_H[row] });
+  const SPR = { // tiny sprites: one character per pixel, "." is transparent
+    person: ["..hh..", ".hhhh.", ".ffff.", "..ff..", ".ssss.", "ssssss", "f.ss.f", "..ss..", ".pppp.", ".p..p.", ".p..p.", "kk..kk"],
+    kid: [".hh.", "hhhh", "ffff", ".ss.", "ssss", "f..f", ".pp.", ".p.p"],
+    seated: ["..hh..", ".hhhh.", ".ffff.", "..ff..", ".ssss.", "ssssss", ".pppppp", ".p...p"],
+    cat: ["k...k.", "kk.kk.", "kkkkkk", ".kkkkkk", ".k..k."],
+    pigeon: [".gg.", "gggw", ".gg."],
+    tooth: [".www.", "wwwww", "wwwww", "ww.ww", "w...w"],
+    lock: [".yy.", "y..y", "yyyy", "yyyy", "yyyy"],
   };
-  const interior = (days) => {
-    const out = [`<defs><pattern id="shut" width="8" height="9" patternUnits="userSpaceOnUse"><rect width="8" height="9" fill="#2a3436"/><rect y="7" width="8" height="2" fill="#151d1f"/></pattern><radialGradient id="glowC" cx=".5" cy="0" r="1.1"><stop offset="0" stop-color="#3b6a5e"/><stop offset=".6" stop-color="#1a2b28"/><stop offset="1" stop-color="#0f1716"/></radialGradient><radialGradient id="glowW" cx=".5" cy="0" r="1.1"><stop offset="0" stop-color="#6b4a24"/><stop offset=".6" stop-color="#2a2016"/><stop offset="1" stop-color="#14100c"/></radialGradient><linearGradient id="dusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b1430"/><stop offset=".7" stop-color="#5a2f45"/><stop offset="1" stop-color="#b4553a"/></linearGradient></defs><rect class="shell" x="0" y="0" width="1200" height="720"/>`];
-    for (const y of ROW_Y.slice(1)) out.push(`<rect class="slab" x="10" y="${y - 12}" width="1180" height="10"/>`);
-    ROOMS.forEach((r, k) => {
-      const c = cell(r.at), open = days >= r.day;
-      out.push(`<g class="room${open ? " open" : ""}" data-room="${k}" tabindex="0" role="button" aria-label="${esc(`${r.zh} ${r.en}, ${open ? "open" : `opens at day ${30 + r.day}`}`)}">` +
-        `<rect class="rbg${r.id === "roof" ? " sky" : ""}" x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}"/>` +
-        (open ? props(r.id, c) + `<text class="rlabel" x="${c.x + 12}" y="${c.y + c.h - 12}">${r.zh}</text>`
-          : `<rect class="shutter" x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}"/>` +
-            `<text class="rlock" x="${c.x + c.w / 2}" y="${c.y + c.h / 2 + 6}">Day ${30 + r.day}</text>`) + `</g>`);
+  const paintCutaway = (ctx, days, t) => {
+    const R = rng(77); // same speckle every frame; only `t` moves things
+    const r = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(x | 0, y | 0, w | 0, h | 0); };
+    const dot = (x, y, c) => r(x, y, 1, 1, c);
+    const spr = (rows, pal, x, y, flip = false) => rows.forEach((row, j) => [...row].forEach((ch, i) => {
+      if (pal[ch]) dot(x + (flip ? row.length - 1 - i : i), y + j, pal[ch]);
+    }));
+    const speckle = (x, y, w, h, cols, n) => { for (let i = 0; i < w * h * n; i++) dot(x + R() * w, y + R() * h, cols[(R() * cols.length) | 0]); };
+    const sag = (x, y, w, depth, c) => { for (let i = 0; i < w; i++) dot(x + i, y + Math.sin((Math.PI * i) / w) * depth, c); };
+    const glow = (x, y, rad, c) => { // stepped halo, no smooth gradients: pixel-pure
+      ctx.globalAlpha = 0.07; for (let k = rad; k > 0; k -= 2) r(x - k, y - k / 2, k * 2, k, c); ctx.globalAlpha = 1;
+    };
+    const cone = (x, y, w, h, c) => { ctx.globalAlpha = 0.06; for (let k = 0; k < h; k += 2) r(x - w / 2 - k / 2, y + k, w + k, 2, c); ctx.globalAlpha = 1; };
+    const tube = (x, y, len, on = true) => { r(x - 1, y - 1, len + 2, 3, "#3b4644"); r(x, y, len, 1, on ? "#f4fffb" : "#6f7c78"); if (on) { glow(x + len / 2, y, 10, "#c8fff0"); } };
+    const bulb = (x, y, c = "#ffe9a8") => { r(x, y - 6, 1, 6, "#222"); r(x - 1, y, 3, 2, c); glow(x, y + 1, 9, c); };
+    const person = (x, y, shirt, pants = "#2b3550", hair = "#17110f", flip = false) =>
+      spr(SPR.person, { h: hair, f: "#d9a37a", s: shirt, p: pants, k: "#111" }, x, y, flip);
+    const wallBase = (c, base, tones, dado) => {
+      r(c.x, c.y, c.w, c.h, base);
+      speckle(c.x, c.y, c.w, c.h, tones, 0.06);
+      for (let i = 0; i < c.w / 18; i++) { const sx = c.x + R() * c.w, sh = 6 + R() * c.h * 0.5; ctx.globalAlpha = 0.18; r(sx, c.y + 2, 1 + R() * 2, sh, "#000"); ctx.globalAlpha = 1; }
+      r(c.x, c.y, c.w, 2, "#121817"); // ceiling slab shadow
+      if (dado) { r(c.x, c.y + c.h - 12, c.w, 9, dado[0]); for (let gx = c.x; gx < c.x + c.w; gx += 4) r(gx, c.y + c.h - 12, 1, 9, dado[1]); r(c.x, c.y + c.h - 8, c.w, 1, dado[1]); }
+      r(c.x, c.y + c.h - 3, c.w, 3, "#1c2322"); for (let fx = c.x; fx < c.x + c.w; fx += 6) r(fx, c.y + c.h - 3, 3, 1, "#2a3331"); // floor
+    };
+    const pipes = (c, y, cols = ["#56645f", "#4a5550"]) => cols.forEach((col, k) => {
+      r(c.x, y + k * 3, c.w, 2, col); r(c.x, y + k * 3, c.w, 1, "#7d8b86");
+      for (let jx = c.x + 7 + k * 11; jx < c.x + c.w; jx += 26) r(jx, y + k * 3 - 1, 2, 4, "#8a9893");
     });
-    return { svg: out.join(""), open: ROOMS.filter((r) => days >= r.day).length };
+
+    // shell: the building's outer skin, slabs and the street
+    r(0, 0, PW, PH, "#060a0b");
+    for (const y of ROW_Y.slice(1)) { r(0, y - 3, PW, 3, "#2b3433"); r(0, y - 3, PW, 1, "#3d4846"); }
+    r(0, 230, PW, 14, "#1a2021"); for (let x = 0; x < PW; x += 8) r(x, 236, 5, 1, "#2a3132"); r(0, 230, PW, 1, "#46504e");
+
+    const painters = {
+      roof(c) {
+        const bands = ["#140f26", "#1d1530", "#2a1a3a", "#3d2043", "#5a2a45", "#7a3443", "#9a4740", "#b85d3b"];
+        bands.forEach((col, k) => r(c.x, c.y + k * (c.h - 8) / bands.length, c.w, (c.h - 8) / bands.length + 1, col));
+        for (let i = 0; i < 26; i++) dot(c.x + R() * c.w, c.y + R() * 12, R() < 0.3 ? "#fff8e0" : "#8f84b0");
+        // Lion Rock and the Kowloon hills far off, then a band of city glow
+        ctx.fillStyle = "#24162f"; ctx.beginPath(); ctx.moveTo(c.x, c.y + 26);
+        [[40, 20], [90, 22], [130, 14], [150, 11], [170, 15], [230, 21], [300, 17], [350, 22], [c.w, 24]].forEach(([dx, dy]) => ctx.lineTo(c.x + dx, c.y + dy));
+        ctx.lineTo(c.x + c.w, c.y + 30); ctx.lineTo(c.x, c.y + 30); ctx.fill();
+        for (let i = 0; i < 60; i++) dot(c.x + R() * c.w, c.y + 24 + R() * 5, ["#ffcf7a", "#ff5fae", "#7fe9d6"][(R() * 3) | 0]);
+        r(c.x, c.y + c.h - 8, c.w, 8, "#2b3231"); speckle(c.x, c.y + c.h - 8, c.w, 8, ["#363e3c", "#222827"], 0.15);
+        r(c.x, c.y + c.h - 9, c.w, 1, "#4a5452"); // parapet edge
+        for (let i = 0; i < 44; i++) { // the aerial forest
+          const ax = c.x + 4 + R() * (c.w - 8), ah = 6 + R() * 18, ay = c.y + c.h - 8;
+          r(ax, ay - ah, 1, ah, "#3e4c4f");
+          const bars = 1 + ((R() * 3) | 0);
+          for (let b = 0; b < bars; b++) { const bw = 3 + R() * 6; r(ax - bw / 2, ay - ah + 1 + b * 3, bw, 1, "#4e5f62"); }
+        }
+        [[60, 9], [205, 11], [330, 8]].forEach(([dx, s]) => { r(c.x + dx, c.y + c.h - 8 - s, 12, s, "#3a4446"); r(c.x + dx, c.y + c.h - 8 - s, 12, 1, "#56625f"); r(c.x + dx + 2, c.y + c.h - 8 - s - 2, 8, 2, "#2c3537"); });
+        // laundry line, fluttering
+        sag(c.x + 100, c.y + 20, 70, 3, "#9aa"); ["#e8283c", "#2f7fe0", "#f2efe6", "#ffb03a", "#12b89a", "#f2efe6"].forEach((col, k) => {
+          const lx = c.x + 106 + k * 10, ly = c.y + 21 + Math.sin((Math.PI * (lx - c.x - 100)) / 70) * 3;
+          r(lx + (Math.sin(t * 3 + k) > 0.6 ? 1 : 0), ly, 5, 5 + (k % 2) * 2, col);
+        });
+        // pigeon coop
+        r(c.x + 260, c.y + c.h - 18, 18, 10, "#1e2526"); for (let gx = 0; gx < 18; gx += 2) r(c.x + 260 + gx, c.y + c.h - 18, 1, 10, "#5c6a68");
+        spr(SPR.pigeon, { g: "#9aa3b8", w: "#e6ebf2" }, c.x + 263, c.y + c.h - 13); spr(SPR.pigeon, { g: "#8a93a8", w: "#e6ebf2" }, c.x + 270, c.y + c.h - 12, true);
+        // a kid on the roof with a kite
+        const kx = c.x + 236, ky = c.y + 8 + Math.sin(t * 1.4) * 2;
+        spr(SPR.kid, { h: "#111", f: "#d9a37a", s: "#e8283c", p: "#2b3550" }, kx - 30, c.y + c.h - 16);
+        sag(kx - 27, ky + 6, 27, -6, "#c9c9c9");
+        ctx.fillStyle = "#ff5fae"; ctx.beginPath(); ctx.moveTo(kx, ky); ctx.lineTo(kx + 4, ky + 4); ctx.lineTo(kx, ky + 8); ctx.lineTo(kx - 4, ky + 4); ctx.fill();
+        r(kx, ky, 1, 8, "#ffd0e6"); for (let k = 0; k < 5; k++) dot(kx + Math.sin(t * 4 + k) , ky + 9 + k * 2, k % 2 ? "#ffb03a" : "#ff5fae");
+        // the Kai Tak approach, every 18 seconds
+        const pt = (t % 18) / 18, px = c.x + c.w + 30 - pt * (c.w + 80), py = c.y + 4 + pt * 6;
+        if (px > c.x - 40 && px < c.x + c.w + 10) {
+          r(px, py + 2, 22, 3, "#2a3134"); r(px + 1, py + 1, 20, 1, "#3c4548"); r(px + 18, py - 2, 3, 4, "#2a3134"); r(px + 8, py + 5, 7, 2, "#2a3134");
+          for (let w = 2; w < 18; w += 3) dot(px + w, py + 3, "#ffe9a8");
+          dot(px + 1, py + 3, t % 1 < 0.5 ? "#ff3b4e" : "#2a3134"); dot(px + 21, py, (t * 2) % 1 < 0.3 ? "#ffffff" : "#2a3134");
+        }
+      },
+      alley(c) {
+        wallBase(c, "#2c3634", ["#33403d", "#253030", "#3a4744"], ["#2f4a40", "#1f342d"]);
+        pipes(c, c.y + 4);
+        for (let k = 0; k < 5; k++) sag(c.x, c.y + 11 + k, c.w, 4 + k * 1.5, ["#151515", "#3b2f26", "#1f1f2a", "#2a2018", "#141c1c"][k]);
+        [[18, "#4a5254"], [104, "#5a4a3a"], [196, "#4a5254"]].forEach(([dx, col]) => { // metal doors with red couplets
+          const dx0 = c.x + dx, dy0 = c.y + c.h - 27;
+          r(dx0, dy0, 15, 24, col); r(dx0, dy0, 15, 1, "#7d8b86"); for (let ry = 3; ry < 24; ry += 5) { dot(dx0 + 2, dy0 + ry, "#8a9893"); dot(dx0 + 12, dy0 + ry, "#8a9893"); }
+          r(dx0 - 3, dy0 + 2, 2, 12, "#b3122a"); r(dx0 + 16, dy0 + 2, 2, 12, "#b3122a"); for (let g = 4; g < 13; g += 3) { dot(dx0 - 3, dy0 + g, "#e8c46a"); dot(dx0 + 16, dy0 + g, "#e8c46a"); }
+          r(dx0 + 3, dy0 - 4, 9, 3, "#b3122a"); dot(dx0 + 7, dy0 - 3, "#e8c46a");
+        });
+        for (let mx = 0; mx < 4; mx++) for (let my = 0; my < 3; my++) { const bx = c.x + 52 + mx * 6, by = c.y + 18 + my * 5; r(bx, by, 5, 4, ["#6b7a6d", "#7a6b5a", "#5a6b7a"][(mx + my) % 3]); dot(bx + 2, by + 1, "#111"); }
+        [[140, 6, "#e8283c"], [232, 9, "#12b89a"]].forEach(([dx, n, col]) => { r(c.x + dx, c.y + 16, 6, n * 2, col); glow(c.x + dx + 3, c.y + 16 + n, 8, col); for (let i = 1; i < n * 2; i += 3) r(c.x + dx + 1, c.y + 16 + i, 4, 1, "#fff"); });
+        [40, 120, 190].forEach((dx, k) => { const on = !(k === 1 && Math.sin(t * 13) > 0.85); tube(c.x + dx, c.y + 14, 18, on); if (on) cone(c.x + dx + 9, c.y + 16, 14, c.h - 19, "#c8fff0"); });
+        [[70, 22], [170, 16]].forEach(([dx, w]) => { r(c.x + dx, c.y + c.h - 4, w, 1, "#7fe9d6"); ctx.globalAlpha = 0.35; r(c.x + dx + 2, c.y + c.h - 4, w - 4, 1, "#f4fffb"); ctx.globalAlpha = 1; });
+        for (let k = 0; k < 3; k++) { const dpx = c.x + 60 + k * 70, dy = ((t * 30 + k * 13) % 28); dot(dpx, c.y + 9 + dy, "#9fd9ff"); }
+        spr(SPR.cat, { k: "#141414" }, c.x + 160, c.y + c.h - 8);
+        const wx = c.x + ((t * 9) % (c.w + 20)) - 10; // someone walking through
+        person(wx, c.y + c.h - 15, "#2f7fe0", "#2b3550", "#17110f", false);
+        r(wx - 3, c.y + c.h - 20, 12, 2, "#b3122a"); r(wx + 2, c.y + c.h - 18, 1, 4, "#222"); // umbrella
+      },
+      fish(c) {
+        wallBase(c, "#9fb0a8", ["#aebdb6", "#93a39c"], null);
+        for (let gx = c.x; gx < c.x + c.w; gx += 4) r(gx, c.y + 2, 1, c.h - 5, "#86978f"); for (let gy = c.y + 2; gy < c.y + c.h - 3; gy += 4) r(c.x, gy, c.w, 1, "#86978f");
+        bulb(c.x + 30, c.y + 9); bulb(c.x + 95, c.y + 9);
+        [8, 44, 80].forEach((dx) => { const vx = c.x + dx; r(vx, c.y + c.h - 17, 24, 14, "#5b6a6e"); r(vx, c.y + c.h - 17, 24, 1, "#c4d0d2"); r(vx + 1, c.y + c.h - 16, 22, 2, "#1f2729"); r(vx + 3, c.y + c.h - 13, 1, 9, "#8a989b"); r(vx + 20, c.y + c.h - 13, 1, 9, "#3e4a4d");
+          for (let s = 0; s < 6; s++) { const sy = ((t * 6 + s * 3 + dx) % 14); ctx.globalAlpha = 0.5 - sy / 30; dot(vx + 6 + ((s * 5) % 12) + Math.sin(t + s) , c.y + c.h - 19 - sy, "#ffffff"); ctx.globalAlpha = 1; } });
+        r(c.x + 30, c.y + c.h - 24, 22, 2, "#6b5a45"); r(c.x + 32, c.y + c.h - 26, 18, 2, "#8a9496"); for (let b = 0; b < 8; b++) dot(c.x + 33 + b * 2, c.y + c.h - 27, "#e8c46a");
+        person(c.x + 36, c.y + c.h - 15, "#e8ecea", "#3a3f4a", "#f2f2f2"); person(c.x + 104, c.y + c.h - 15, "#e8ecea", "#3a3f4a", "#f2f2f2", true);
+        r(c.x + 120, c.y + c.h - 7, 4, 4, "#b3122a"); r(c.x + 2, c.y + c.h - 7, 4, 4, "#2f7fe0"); sag(c.x + 4, c.y + c.h - 4, 30, 1, "#2f8a4a");
+      },
+      dentist(c) {
+        wallBase(c, "#6f8a7e", ["#7a978a", "#647e72"], ["#cfd8d2", "#a9b4ad"]);
+        r(c.x + 8, c.y + 6, 14, 10, "#1b2a33"); for (let g = 0; g < 14; g += 3) r(c.x + 8 + g, c.y + 6, 1, 10, "#8a9893"); dot(c.x + 12, c.y + 9, "#ffcf7a"); dot(c.x + 17, c.y + 12, "#7fe9d6");
+        r(c.x + 30, c.y + 5, 16, 12, "#b3122a"); spr(SPR.tooth, { w: "#fff" }, c.x + 35, c.y + 8);
+        [[52, 6], [62, 7]].forEach(([dx, dy]) => { r(c.x + dx, c.y + dy, 8, 9, "#c9a13b"); r(c.x + dx + 1, c.y + dy + 1, 6, 7, "#f2efe6"); r(c.x + dx + 2, c.y + dy + 3, 4, 1, "#888"); r(c.x + dx + 2, c.y + dy + 5, 3, 1, "#888"); });
+        const cx = c.x + 70, cy = c.y + c.h - 4;
+        r(cx + 6, cy - 4, 4, 4, "#9aa8aa"); r(cx, cy - 9, 22, 5, "#b3122a"); r(cx, cy - 9, 22, 1, "#e04a5a"); r(cx + 18, cy - 17, 5, 9, "#b3122a"); r(cx + 18, cy - 17, 1, 9, "#e04a5a"); r(cx - 4, cy - 8, 5, 2, "#b3122a");
+        spr(SPR.seated, { h: "#17110f", f: "#d9a37a", s: "#ffb03a", p: "#2b3550" }, cx + 2, cy - 16);
+        r(cx + 30, c.y + 4, 1, 12, "#9aa8aa"); r(cx + 14, c.y + 15, 17, 1, "#9aa8aa"); r(cx + 12, c.y + 15, 4, 2, "#fff8e0"); glow(cx + 14, c.y + 17, 12, "#fff8e0"); cone(cx + 14, c.y + 17, 6, 14, "#fff8e0");
+        person(cx + 32, cy - 12, "#f2f2f2", "#5a6470", "#2a2220", true);
+        r(c.x + 6, cy - 16, 14, 16, "#3c4a4c"); for (let s = 0; s < 3; s++) { r(c.x + 6, cy - 12 + s * 4, 14, 1, "#2a3436"); for (let j = 0; j < 4; j++) r(c.x + 8 + j * 3, cy - 15 + s * 4, 2, 3, ["#e8283c", "#7fe9d6", "#ffcf7a", "#f2efe6"][(s + j) % 4]); }
+        r(c.x + 24, cy - 9, 6, 2, "#e8ecea"); r(c.x + 26, cy - 7, 2, 7, "#9aa8aa");
+      },
+      well(c) {
+        wallBase(c, "#3a4644", ["#43504e", "#323d3b"], null);
+        r(c.x + 6, c.y + c.h - 22, 20, 19, "#3c5a6a"); r(c.x + 6, c.y + c.h - 22, 20, 1, "#6e93a6"); // the pump
+        for (let a = 0; a < 16; a++) { const ang = (a / 16) * Math.PI * 2 + t * 2; dot(c.x + 34 + Math.cos(ang) * 6, c.y + c.h - 14 + Math.sin(ang) * 6, "#8a9893"); }
+        r(c.x + 33, c.y + c.h - 15, 3, 3, "#c4d0d2");
+        r(c.x + 9, c.y + c.h - 19, 7, 7, "#f2efe6"); const na = -2.4 + Math.sin(t * 1.7) * 0.8; dot(c.x + 12 + Math.cos(na) * 2, c.y + c.h - 16 + Math.sin(na) * 2, "#e8283c"); dot(c.x + 12, c.y + c.h - 16, "#222");
+        r(c.x + 14, c.y + 6, 3, c.h - 28, "#56645f"); r(c.x + 14, c.y + 6, c.w - 30, 3, "#56645f"); r(c.x + 60, c.y + 6, 3, 20, "#56645f"); r(c.x + 60, c.y + 26, 40, 3, "#56645f"); r(c.x + 97, c.y + 9, 3, 20, "#56645f");
+        [[15, 14], [61, 18], [80, 26]].forEach(([dx, dy]) => { r(c.x + dx - 2, c.y + dy, 7, 1, "#c0392b"); r(c.x + dx + 1, c.y + dy - 3, 1, 7, "#c0392b"); });
+        r(c.x + 102, c.y + 12, 20, c.h - 15, "#4a5658"); r(c.x + 102, c.y + 12, 20, 1, "#7d8b86"); for (let rv = 15; rv < c.h - 4; rv += 5) { dot(c.x + 103, c.y + rv, "#8a9893"); dot(c.x + 120, c.y + rv, "#8a9893"); }
+        r(c.x + 108, c.y + 16, 3, c.h - 22, "#1a2a33"); r(c.x + 108, c.y + 16 + (c.h - 22) * 0.4, 3, (c.h - 22) * 0.6, "#2f7fe0");
+        [44, 54, 64, 74].forEach((dx, k) => { r(c.x + dx, c.y + c.h - 9, 7, 6, ["#e8283c", "#2f7fe0", "#e8283c", "#ffb03a"][k]); sag(c.x + dx, c.y + c.h - 11, 7, -2, "#888"); });
+        for (let k = 0; k < 3; k++) { const dy = (t * 26 + k * 9) % (c.h - 10); dot(c.x + 70 + k * 12, c.y + 29 + dy * 0.4, "#9fd9ff"); }
+        ctx.globalAlpha = 0.3; r(c.x + 40, c.y + c.h - 3, 50, 1, "#7fe9d6"); ctx.globalAlpha = 1; tube(c.x + 30, c.y + 4, 16);
+      },
+      noodle(c) {
+        wallBase(c, "#5a4a3a", ["#64533f", "#4e3f31"], null);
+        bulb(c.x + 64, c.y + 8, "#ffd98a");
+        [8, 16].forEach((ry) => { r(c.x + 4, c.y + ry, c.w - 8, 1, "#8a6a40"); for (let i = 0; i < (c.w - 12) / 2; i++) { const nx = c.x + 6 + i * 2 + (ry === 16 ? 1 : 0); const len = 6 + ((i * 7) % 5); for (let l = 0; l < len; l++) dot(nx + (l % 4 === 2 ? 1 : 0), c.y + ry + 1 + l, l % 3 ? "#f2e6c0" : "#e2d2a0"); } });
+        r(c.x + 10, c.y + c.h - 12, 50, 3, "#7a5530"); r(c.x + 12, c.y + c.h - 9, 2, 6, "#5a3e22"); r(c.x + 56, c.y + c.h - 9, 2, 6, "#5a3e22");
+        for (let k = 0; k < 9; k++) r(c.x + 22 + k, c.y + c.h - 13 - Math.min(k, 8 - k), 1, Math.min(k, 8 - k) + 1, "#f6f2e8");
+        r(c.x + 70, c.y + c.h - 18, 16, 15, "#5b6a6e"); r(c.x + 70, c.y + c.h - 18, 16, 1, "#9aa8aa"); r(c.x + 86, c.y + c.h - 14 + Math.round(Math.sin(t * 3)), 5, 1, "#9aa8aa");
+        [96, 106, 114].forEach((dx, k) => { r(c.x + dx, c.y + c.h - 11 + (k % 2), 9, 8 - (k % 2), "#b8a07a"); r(c.x + dx + 2, c.y + c.h - 8, 5, 1, "#8a6a40"); });
+        person(c.x + 40, c.y + c.h - 15, "#f2efe6", "#3a3f4a", "#17110f");
+      },
+      school(c) {
+        wallBase(c, "#8fa38f", ["#9bb09b", "#829682"], ["#5d7a5d", "#4a634a"]);
+        r(c.x + 6, c.y + 5, 46, 18, "#7a5530"); r(c.x + 7, c.y + 6, 44, 16, "#1f3a2c");
+        for (let l = 0; l < 4; l++) for (let ch = 0; ch < 8 - l; ch++) if ((ch * 3 + l) % 4) r(c.x + 9 + ch * 5, c.y + 8 + l * 4, 3, 1, "#e8f1ec");
+        r(c.x + 58, c.y + 6, 8, 8, "#f2efe6"); dot(c.x + 62, c.y + 9, "#111"); dot(c.x + 62, c.y + 10, "#111"); dot(c.x + 63, c.y + 10, "#111");
+        const fan = Math.floor(t * 8) % 2; r(c.x + 90, c.y + 2, 1, 3, "#555"); r(c.x + 84 + fan, c.y + 5, 13 - fan * 2, 1, "#777"); dot(c.x + 90, c.y + 5, "#999");
+        [[100, 6], [112, 6]].forEach(([dx, dy]) => { r(c.x + dx, c.y + dy, 9, 11, "#2a4a5a"); for (let g = 0; g < 9; g += 2) r(c.x + dx + g, c.y + dy, 1, 11, "#4a5a5a"); });
+        for (let row = 0; row < 2; row++) for (let d = 0; d < 4; d++) {
+          const dx = c.x + 52 + d * 18 + row * 4, dy = c.y + c.h - 13 + row * 4;
+          spr(SPR.kid, { h: "#111", f: "#d9a37a", s: d % 2 ? "#f2efe6" : "#2f7fe0", p: "#2b3550" }, dx + 4, dy - 9);
+          r(dx, dy, 12, 2, "#a07040"); r(dx + 1, dy + 2, 1, 4, "#6a4a2a"); r(dx + 10, dy + 2, 1, 4, "#6a4a2a");
+        }
+        person(c.x + 20, c.y + c.h - 15, "#b3122a", "#2b2b2b", "#2a2220"); tube(c.x + 40, c.y + 3, 20);
+      },
+      temple(c) {
+        wallBase(c, "#4a1416", ["#561a1c", "#3e1012"], null);
+        for (let gx = c.x + 4; gx < c.x + c.w; gx += 10) { dot(gx, c.y + 6, "#c9a13b"); dot(gx + 5, c.y + 8, "#c9a13b"); }
+        [[16, 0], [48, 1], [80, 0], [108, 1]].forEach(([dx, k]) => { // incense coils hanging from the ceiling
+          const ix = c.x + dx; r(ix, c.y + 2, 1, 4, "#777");
+          for (let ring = 0; ring < 5; ring++) { const rw = 2 + ring * 2, ry = c.y + 6 + ring * 2; r(ix - rw / 2, ry, rw + 1, 1, ring % 2 ? "#b07a3a" : "#8a5a2a"); }
+          r(ix - 1, c.y + 16, 3, 2, "#e8c46a"); dot(ix, c.y + 18, Math.sin(t * 5 + k * 2) > 0 ? "#ff5a3a" : "#ffb03a");
+        });
+        r(c.x + 30, c.y + c.h - 15, 66, 12, "#8e1b24"); r(c.x + 30, c.y + c.h - 15, 66, 1, "#e8c46a"); r(c.x + 30, c.y + c.h - 5, 66, 1, "#c9a13b");
+        const gx0 = c.x + 56; r(gx0, c.y + c.h - 30, 14, 15, "#c9a13b"); r(gx0 + 4, c.y + c.h - 34, 6, 5, "#c9a13b"); r(gx0 + 2, c.y + c.h - 26, 10, 1, "#f2d27a"); dot(gx0 + 6, c.y + c.h - 32, "#7a5a1a"); dot(gx0 + 8, c.y + c.h - 32, "#7a5a1a");
+        glow(gx0 + 7, c.y + c.h - 24, 14, "#ffcf7a");
+        [36, 88].forEach((dx) => { r(c.x + dx, c.y + c.h - 21, 2, 6, "#e8283c"); dot(c.x + dx, c.y + c.h - 22 - (Math.sin(t * 9 + dx) > 0.3 ? 1 : 0), "#ffcf7a"); glow(c.x + dx, c.y + c.h - 22, 5, "#ffcf7a"); });
+        [44, 76].forEach((dx) => { r(c.x + dx, c.y + c.h - 17, 6, 2, "#e8901f"); dot(c.x + dx + 1, c.y + c.h - 18, "#e8901f"); dot(c.x + dx + 3, c.y + c.h - 18, "#ffb03a"); });
+        [8, 116].forEach((dx) => { r(c.x + dx, c.y + 20, 7, 9, "#e8283c"); r(c.x + dx, c.y + 20, 7, 1, "#c9a13b"); r(c.x + dx, c.y + 28, 7, 1, "#c9a13b"); r(c.x + dx + 3, c.y + 29, 1, 4, "#e8c46a"); glow(c.x + dx + 3, c.y + 24, 8, "#ff3b4e"); });
+        for (let s = 0; s < 10; s++) { const sy = (t * 5 + s * 2.3) % 22; ctx.globalAlpha = 0.45 - sy / 50; dot(c.x + 63 + Math.sin(t * 2 + s) * 2 + Math.sin(sy / 3) * 2, c.y + c.h - 36 - sy, "#d8d0c8"); ctx.globalAlpha = 1; }
+      },
+      stairs(c) {
+        wallBase(c, "#3a4240", ["#434c4a", "#323937"], null);
+        for (let g = 0; g < 14; g++) dot(c.x + 70 + R() * 30, c.y + 8 + R() * 10, ["#e8283c", "#2f7fe0", "#ffb03a", "#12b89a"][g % 4]);
+        r(c.x + 100, c.y + 6, 14, 14, "#0b1418"); for (let g = 0; g < 14; g += 3) r(c.x + 100 + g, c.y + 6, 1, 14, "#6a7472"); for (let w = 0; w < 9; w++) dot(c.x + 101 + R() * 12, c.y + 8 + R() * 10, R() < 0.5 ? "#ffcf7a" : "#7fe9d6");
+        for (let s = 0; s < 8; s++) { const sx = c.x + 6 + s * 9, sy = c.y + c.h - 4 - s * 4.5; r(sx, sy, 10, 2, "#6b7775"); r(sx, sy, 10, 1, "#8a9694"); r(sx, sy + 2, 10, c.y + c.h - sy - 2, "#2b3331"); }
+        for (let s = 0; s < 8; s++) { const sx = c.x + 8 + s * 9, sy = c.y + c.h - 14 - s * 4.5; r(sx, sy, 1, 9, "#9aa8aa"); }
+        for (let k = 0; k < 66; k++) dot(c.x + 8 + k, c.y + c.h - 14 - (k / 9) * 4.5, "#9aa8aa");
+        spr(SPR.kid, { h: "#111", f: "#d9a37a", s: "#ffb03a", p: "#2b3550" }, c.x + 33, c.y + c.h - 24);
+        r(c.x + 4, c.y + c.h - 5, 3, 2, "#e8283c"); r(c.x + 8, c.y + c.h - 5, 3, 2, "#e8283c"); bulb(c.x + 50, c.y + 8);
+      },
+      home(c) {
+        wallBase(c, "#6f7f8a", ["#7a8a96", "#64737d"], null);
+        r(c.x + 4, c.y + 8, 24, 30, "#4a3a2a"); r(c.x + 4, c.y + 20, 24, 2, "#3a2a1a"); // bunk bed
+        for (let b = 0; b < 22; b += 2) { r(c.x + 5 + b, c.y + 17, 2, 3, b % 4 ? "#e8283c" : "#f2efe6"); r(c.x + 5 + b, c.y + 30, 2, 3, b % 4 ? "#2f7fe0" : "#f2efe6"); }
+        spr(SPR.kid, { h: "#111", f: "#d9a37a", s: "#12b89a", p: "#2b3550" }, c.x + 12, c.y + 9);
+        r(c.x + 34, c.y + 6, 10, 9, "#f2efe6"); r(c.x + 34, c.y + 6, 10, 2, "#e8283c"); r(c.x + 37, c.y + 9, 4, 4, "#333"); // calendar
+        r(c.x + 50, c.y + 7, 6, 5, "#c9a13b"); r(c.x + 51, c.y + 8, 4, 3, "#556"); r(c.x + 58, c.y + 8, 5, 4, "#c9a13b"); r(c.x + 59, c.y + 9, 3, 2, "#655");
+        r(c.x + 36, c.y + c.h - 13, 34, 2, "#8a5a2a"); r(c.x + 38, c.y + c.h - 11, 1, 8, "#6a4a2a"); r(c.x + 67, c.y + c.h - 11, 1, 8, "#6a4a2a");
+        r(c.x + 40, c.y + c.h - 18, 7, 5, "#f2efe6"); r(c.x + 41, c.y + c.h - 19, 5, 1, "#ccc"); r(c.x + 50, c.y + c.h - 20, 4, 7, "#e8283c"); dot(c.x + 51, c.y + c.h - 17, "#ffb03a"); r(c.x + 57, c.y + c.h - 15, 4, 2, "#f2efe6"); r(c.x + 62, c.y + c.h - 15, 4, 2, "#f2efe6");
+        spr(SPR.seated, { h: "#d0d0d0", f: "#d9a37a", s: "#5a3a6a", p: "#2b2b2b" }, c.x + 70, c.y + c.h - 11);
+        r(c.x + 84, c.y + c.h - 21, 18, 14, "#2a2a2a"); r(c.x + 86, c.y + c.h - 19, 14, 10, ["#2f7fe0", "#12b89a", "#e8901f", "#7fe9d6"][Math.floor(t * 2) % 4]); r(c.x + 88, c.y + c.h - 7, 2, 4, "#222"); r(c.x + 96, c.y + c.h - 7, 2, 4, "#222");
+        glow(c.x + 93, c.y + c.h - 14, 12, "#7fe9d6");
+        r(c.x + 106, c.y + 5, 18, 16, "#0b1418"); for (let g = 0; g < 18; g += 3) r(c.x + 106 + g, c.y + 5, 1, 16, "#8a9893"); for (let g = 0; g < 16; g += 4) r(c.x + 106, c.y + 5 + g, 18, 1, "#8a9893");
+        r(c.x + 108, c.y + 24, 14, 6, "#8e1b24"); dot(c.x + 111, c.y + 26, "#ff3b4e"); dot(c.x + 118, c.y + 26, "#ff3b4e"); glow(c.x + 115, c.y + 27, 7, "#ff3b4e");
+        bulb(c.x + 60, c.y + 9, "#ffe9a8");
+      },
+      wires(c) {
+        wallBase(c, "#2a2f2e", ["#323837", "#232827"], null);
+        for (let my = 0; my < 3; my++) for (let mx = 0; mx < 7; mx++) { // electricity meters, discs turning
+          const bx = c.x + 6 + mx * 11, by = c.y + 10 + my * 10;
+          r(bx, by, 9, 8, "#3c4446"); r(bx + 1, by + 1, 7, 4, "#e8ecea"); r(bx + 1 + ((Math.floor(t * (3 + mx + my)) % 5)), by + 4, 2, 1, "#111"); dot(bx + 4, by + 6, "#e8283c");
+        }
+        for (let k = 0; k < 9; k++) sag(c.x, c.y + 6 + k, c.w, 4 + (k * 7) % 9, ["#151515", "#3b2f26", "#20282a", "#4a2020", "#1a1a2a"][k % 5]);
+        r(c.x + 90, c.y + 14, 14, 18, "#4a5254"); r(c.x + 90, c.y + 14, 14, 1, "#7d8b86"); r(c.x + 95, c.y + 18, 4, 4, "#ffb03a");
+        if (Math.sin(t * 7) > 0.92) { for (let s = 0; s < 6; s++) dot(c.x + 104 + R() * 6, c.y + 16 + R() * 6, "#fff3a0"); glow(c.x + 106, c.y + 18, 8, "#fff3a0"); }
+        for (let ly = 0; ly < 22; ly += 3) r(c.x + 112, c.y + c.h - 4 - ly, 8, 1, "#9a8a5a"); r(c.x + 112, c.y + c.h - 26, 1, 23, "#9a8a5a"); r(c.x + 119, c.y + c.h - 26, 1, 23, "#9a8a5a");
+        tube(c.x + 30, c.y + 4, 22);
+      },
+      yamen(c) {
+        for (let k = 0; k < 6; k++) r(c.x, c.y + k * 4, c.w, 4, ["#0d1424", "#111a2c", "#152034", "#1a263a", "#1e2c40", "#223246"][k]);
+        for (let s = 0; s < 6; s++) dot(c.x + R() * c.w, c.y + R() * 10, "#fff8e0");
+        r(c.x, c.y + c.h - 6, c.w, 6, "#3a3a34"); for (let p = 0; p < c.w; p += 6) r(c.x + p, c.y + c.h - 6, 5, 1, "#56564c");
+        const rx = c.x + 18, rw = c.w - 36, ry = c.y + 10;
+        for (let k = 0; k < 7; k++) r(rx - 6 + k, ry + k, rw + 12 - k * 2, 1, "#3b4a44"); // stepped roof
+        r(rx - 8, ry - 1, 3, 2, "#3b4a44"); r(rx + rw + 5, ry - 1, 3, 2, "#3b4a44"); // upturned eaves
+        for (let tx = rx - 4; tx < rx + rw + 4; tx += 2) r(tx, ry + 1, 1, 5, "#2a3632");
+        r(rx - 6, ry - 1, rw + 12, 1, "#5a6a62");
+        r(rx, ry + 7, rw, c.h - 23, "#cbbfa8"); speckle(rx, ry + 7, rw, c.h - 23, ["#bfb39c", "#d6cbb6"], 0.08);
+        [0, 0.33, 0.66, 1].forEach((f) => r(rx + f * (rw - 3), ry + 7, 3, c.h - 23, "#8e1b24"));
+        r(rx + rw / 2 - 10, ry + 9, 20, 5, "#1a1a1a"); r(rx + rw / 2 - 9, ry + 10, 18, 3, "#c9a13b");
+        r(rx + rw / 2 - 6, c.y + c.h - 15, 12, 9, "#6b2a1f"); r(rx + rw / 2, c.y + c.h - 15, 1, 9, "#3a140f");
+        [rx + 6, rx + rw - 10].forEach((lx) => { r(lx, ry + 14, 4, 5, "#e8283c"); glow(lx + 2, ry + 16, 8, "#ff3b4e"); });
+        [4, c.w - 14].forEach((dx) => { for (let b = 0; b < 30; b++) dot(c.x + dx + R() * 10, c.y + c.h - 16 + R() * 10, R() < 0.5 ? "#2f5d4a" : "#3f7a5e"); r(c.x + dx + 4, c.y + c.h - 7, 2, 2, "#4a3020"); });
+      },
+    };
+
+    ROOMS.forEach((room) => {
+      const c = cell(room.at);
+      if (days >= room.day) { ctx.save(); ctx.beginPath(); ctx.rect(c.x, c.y, c.w, c.h); ctx.clip(); painters[room.id](c); ctx.restore(); return; }
+      // closed: a roll-up metal shutter with rust and a padlock
+      r(c.x, c.y, c.w, c.h, "#2a3436");
+      for (let sy = c.y; sy < c.y + c.h; sy += 3) { r(c.x, sy, c.w, 1, "#3a4648"); r(c.x, sy + 2, c.w, 1, "#1a2224"); }
+      for (let i = 0; i < c.w / 10; i++) { ctx.globalAlpha = 0.25; r(c.x + R() * c.w, c.y + R() * c.h * 0.5, 1, 4 + R() * 10, "#6b3a1f"); ctx.globalAlpha = 1; }
+      r(c.x, c.y + c.h - 3, c.w, 3, "#4a5456");
+      spr(SPR.lock, { y: "#c9a13b" }, c.x + c.w / 2 - 2, c.y + c.h - 9);
+    });
   };
 
   // one set of window listeners for drag-to-pan, whichever scene is on screen
@@ -814,7 +1005,7 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
 
   const renderInside = (body, unlocked) => {
     const mine = Math.max(0, Math.min(FULL_CITY, streak.count - FULL_CITY)); // days past 30, this streak
-    const state = { days: unlocked ? mine : ROOMS[3].day, torch: false };
+    const state = { days: unlocked ? mine : ROOMS[3].day, torch: false, sel: 0 };
     body.innerHTML = `
       ${unlocked ? (streak.count < FULL_CITY ? `<p class="k-note">Your streak reset to day ${streak.count}, so the rooms are dark again. They reopen one by one from day ${FULL_CITY + 1}.</p>` : "")
         : `<p class="k-note">You're peeking. The gate opens for real when your streak reaches day ${FULL_CITY} (you're on day ${Math.max(1, streak.count)}). Until then this is a preview.</p>`}
@@ -824,43 +1015,67 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
         ${unlocked ? `<button type="button" class="btn" id="i-mine">Back to my streak</button>` : ""}
         <button type="button" class="btn" id="i-torch" aria-pressed="false">Torch</button>
       </div>
-      <div class="scene-wrap inside" id="i-wrap"><div class="scene scene-in" id="i-scene"><svg class="interior" id="i-svg" viewBox="0 0 1200 720" role="img"></svg></div><div class="torch" aria-hidden="true"></div></div>
+      <div class="scene-wrap inside" id="i-wrap"><div class="scene scene-in" id="i-scene"><div class="cut">
+        <canvas id="i-canvas" width="${PW}" height="${PH}" role="img"></canvas><div class="rooms" id="i-rooms"></div>
+      </div></div><div class="torch" aria-hidden="true"></div></div>
       <p class="k-hint">Tap a room to learn about it. Turn on the torch and move your finger or mouse to explore in the dark.</p>
       <div class="k-below">
         <aside class="sign-card" id="i-card" aria-live="polite"></aside>
         <div class="power" id="i-power"></div>
       </div>
       <h2 class="ms-h">Rooms</h2>
-      <ul class="registry" id="i-reg"></ul>
-      <section class="quiz" aria-labelledby="quiz-h"><h2 class="ms-h" id="quiz-h">Walled City quiz</h2><div id="quiz"></div></section>`;
+      <ul class="registry" id="i-reg"></ul>`;
 
-    const svg = document.getElementById("i-svg"), wrap = document.getElementById("i-wrap"), scene = document.getElementById("i-scene");
+    const canvas = document.getElementById("i-canvas"), ctx = canvas.getContext("2d");
+    const wrap = document.getElementById("i-wrap"), scene = document.getElementById("i-scene"), roomsEl = document.getElementById("i-rooms");
+    const pct = (v, of) => `${((v / of) * 100).toFixed(3)}%`;
     const card = (k) => {
       const r = ROOMS[k], open = state.days >= r.day;
       document.getElementById("i-card").innerHTML = `<p class="sc-sign sc-c2${open ? " on" : ""}" lang="zh-Hant" aria-hidden="true">${r.zh}</p>
         <div><h3>${zhSpan(r.zh)} ${esc(r.en)}</h3><p class="sc-state">${open ? "Open" : `Opens at day ${FULL_CITY + r.day}`}</p><p>${open ? esc(r.fact) : "The shutter is down. Keep your streak going to open it."}</p></div>`;
     };
+    const pick = (k) => {
+      state.sel = k;
+      card(k);
+      roomsEl.querySelectorAll(".room-btn").forEach((b) => b.setAttribute("aria-pressed", +b.dataset.room === k));
+    };
     const draw = () => {
-      const c = interior(state.days);
-      svg.innerHTML = c.svg;
-      svg.setAttribute("aria-label", `Cutaway of a Walled City block, ${c.open} of ${ROOMS.length} rooms open`);
+      const open = ROOMS.filter((r) => state.days >= r.day).length;
+      canvas.setAttribute("aria-label", `Pixel-art cutaway of a Walled City block, ${open} of ${ROOMS.length} rooms open`);
+      roomsEl.innerHTML = ROOMS.map((r, k) => {
+        const c = cell(r.at), on = state.days >= r.day;
+        return `<button type="button" class="room-btn${on ? " open" : ""}" data-room="${k}" aria-pressed="${k === state.sel}"
+          style="left:${pct(c.x, PW)};top:${pct(c.y, PH)};width:${pct(c.w, PW)};height:${pct(c.h, PH)}"
+          aria-label="${esc(`${r.zh} ${r.en}, ${on ? "open" : `opens at day ${FULL_CITY + r.day}`}`)}">
+          <span class="rl" lang="zh-Hant" aria-hidden="true">${r.zh}</span>${on ? "" : `<span class="rlk" aria-hidden="true">Day ${FULL_CITY + r.day}</span>`}</button>`;
+      }).join("");
       const preview = !unlocked || state.days !== mine;
       document.getElementById("i-day-label").textContent = `day ${FULL_CITY + state.days}${preview ? " (preview)" : ", your streak"}`;
       const mineBtn = document.getElementById("i-mine");
       if (mineBtn) mineBtn.hidden = !preview;
       const next = ROOMS.find((r) => r.day > state.days);
       document.getElementById("i-power").innerHTML = `
-        <p class="power-day"><strong>Day ${FULL_CITY + state.days}</strong> <span>${c.open} of ${ROOMS.length} rooms open</span></p>
-        <progress max="${ROOMS.length}" value="${c.open}" aria-label="Rooms open"></progress>
+        <p class="power-day"><strong>Day ${FULL_CITY + state.days}</strong> <span>${open} of ${ROOMS.length} rooms open</span></p>
+        <progress max="${ROOMS.length}" value="${open}" aria-label="Rooms open"></progress>
         <p class="power-next">${next ? `Day ${FULL_CITY + next.day} opens ${zhSpan(next.zh)} ${esc(next.en.toLowerCase())}.` : "Every room is open. You've seen the whole Walled City."}</p>
-        <p class="power-best">${preview ? "Previewing." : `Best streak: ${plural(streak.best, "day")}.`} Quiz best: ${store.get("quizBest", 0)} of ${QUIZ_LEN}.</p>`;
+        <p class="power-best">${preview ? "Previewing." : `Best streak: ${plural(streak.best, "day")}.`}</p>`;
       document.getElementById("i-reg").innerHTML = ROOMS.map((r, k) => `<li><button type="button" class="reg${state.days >= r.day ? " on" : ""}" data-room-reg="${k}">
         <span class="sc-sign sc-c2${state.days >= r.day ? " on" : ""}" lang="zh-Hant" aria-hidden="true">${r.zh}</span>
         <span class="reg-t"><strong>${esc(r.en)}</strong><span>${state.days >= r.day ? "Open" : `Day ${FULL_CITY + r.day}`}</span></span></button></li>`).join("");
-      quizReset();
+      card(state.sel);
+      paintCutaway(ctx, state.days, performance.now() / 1000);
     };
 
-    // torch: everything dark except a circle around the pointer
+    // animation: ~12 fps, only while the cutaway is on screen and the tab is visible; still frame for reduced motion
+    let visible = true, last = 0;
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(canvas);
+    const tick = (now) => {
+      if (!canvas.isConnected) return; // page re-rendered: stop
+      if (visible && !document.hidden && now - last > 80) { last = now; paintCutaway(ctx, state.days, now / 1000); }
+      requestAnimationFrame(tick);
+    };
+    if (!reduceMotion) requestAnimationFrame(tick);
+
     document.getElementById("i-torch").addEventListener("click", (e) => {
       state.torch = !state.torch;
       e.currentTarget.setAttribute("aria-pressed", state.torch);
@@ -872,20 +1087,10 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
       wrap.style.setProperty("--my", `${e.clientY - b.top}px`);
     });
     pannable(scene);
-
-    const pick = (k) => {
-      card(k);
-      svg.querySelectorAll(".room.sel").forEach((x) => x.classList.remove("sel"));
-      svg.querySelector(`[data-room="${k}"]`)?.classList.add("sel");
-    };
-    svg.addEventListener("click", (e) => {
+    roomsEl.addEventListener("click", (e) => {
       if (panMoved) { panMoved = false; return; }
-      const r = e.target.closest(".room");
-      if (r) pick(+r.dataset.room);
-    });
-    svg.addEventListener("keydown", (e) => {
-      const r = e.target.closest?.(".room");
-      if (r && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); pick(+r.dataset.room); }
+      const b = e.target.closest(".room-btn");
+      if (b) pick(+b.dataset.room);
     });
     document.getElementById("i-reg").addEventListener("click", (e) => {
       const b = e.target.closest("[data-room-reg]");
@@ -896,52 +1101,7 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
     const day = document.getElementById("i-day");
     day.addEventListener("input", () => { state.days = +day.value; draw(); });
     document.getElementById("i-mine")?.addEventListener("click", () => { state.days = mine; day.value = mine; draw(); });
-
-    // quiz: questions come from open rooms only, so it grows as you go deeper
-    const QUIZ_LEN = 5;
-    const quiz = document.getElementById("quiz");
-    let q = null;
-    const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
-    function quizReset() {
-      const pool = ROOMS.filter((r) => state.days >= r.day);
-      if (pool.length < 3) {
-        quiz.innerHTML = `<p class="empty-note">Open 3 rooms to start the quiz (${pool.length} open now). Each room you open adds a question.</p>`;
-        return;
-      }
-      quiz.innerHTML = `<p>${plural(Math.min(QUIZ_LEN, pool.length), "question")} from the ${plural(pool.length, "room")} you've opened.</p><button type="button" class="btn" id="quiz-go">Start the quiz</button>`;
-      document.getElementById("quiz-go").addEventListener("click", () => {
-        q = { list: shuffle([...pool]).slice(0, QUIZ_LEN), i: 0, score: 0 };
-        ask();
-      });
-    }
-    const ask = () => {
-      const r = q.list[q.i], [prompt, opts] = r.q;
-      const order = shuffle(opts.map((o, i) => ({ o, right: i === 0 })));
-      quiz.innerHTML = `<p class="q-count">Question ${q.i + 1} of ${q.list.length}</p><p class="q-ask">${esc(prompt)}</p>
-        <div class="q-opts">${order.map((x, i) => `<button type="button" class="q-opt" data-right="${x.right}">${esc(x.o)}</button>`).join("")}</div>
-        <div class="q-after" aria-live="polite"></div>`;
-      quiz.querySelectorAll(".q-opt").forEach((b) => b.addEventListener("click", () => {
-        const right = b.dataset.right === "true";
-        if (right) { q.score++; navigator.vibrate?.(15); }
-        quiz.querySelectorAll(".q-opt").forEach((x) => { x.disabled = true; x.classList.toggle("right", x.dataset.right === "true"); });
-        if (!right) b.classList.add("wrong");
-        const last = q.i === q.list.length - 1;
-        quiz.querySelector(".q-after").innerHTML = `<p class="q-verdict ${right ? "up" : "down"}">${right ? "Correct." : "Not quite."}</p><p>${zhSpan(r.zh)} ${esc(r.fact)}</p>
-          <button type="button" class="btn" id="q-next">${last ? "See your score" : "Next question"}</button>`;
-        document.getElementById("q-next").focus();
-        document.getElementById("q-next").addEventListener("click", () => (last ? finish() : (q.i++, ask())));
-      }));
-    };
-    const finish = () => {
-      const best = Math.max(store.get("quizBest", 0), q.score);
-      store.set("quizBest", best);
-      quiz.innerHTML = `<p class="q-ask">You got ${q.score} of ${q.list.length}.</p><p>${q.score === q.list.length ? "A perfect run. You know the Walled City." : "Tap a room above to read its story, then try again."} Best: ${best} of ${QUIZ_LEN}.</p>
-        <button type="button" class="btn" id="quiz-again">Try again</button>`;
-      document.getElementById("quiz-again").addEventListener("click", quizReset);
-    };
-
     draw();
-    pick(0);
   };
 
   // ── keyboard ─────────────────────────────────────────
