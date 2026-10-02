@@ -5,7 +5,7 @@ on:
     # Hourly, at :17 (top-of-hour runs are the ones GitHub most often drops). The pipeline skips
     # unless the last briefing is `update_every_hours` old (config.yaml), so missed runs catch up within an hour.
     - cron: "17 * * * *"
-  workflow_dispatch:
+  workflow_dispatch:     # also started every 4 hours by an outside timer (README step 6): GitHub drops many cron runs
   push:                  # your own edits (config, code, design) publish right away
     branches: [main]
     paths-ignore: ["data/**", "README.md"]

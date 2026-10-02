@@ -34,7 +34,24 @@ Open **Settings**, then **Actions**, then **General**. Under **Workflow permissi
 
 From now on it runs by itself every morning.
 
-### 6. Optional extras (secrets)
+### 6. Make updates reliable (recommended, 5 minutes)
+GitHub's own scheduler often skips runs on small repositories, so an outside timer starts the update instead.
+1. **Create a token:** on GitHub, open your profile picture, then **Settings**, **Developer settings**, **Personal access tokens**, **Fine-grained tokens**, **Generate new token**.
+   - Name it `briefing-timer` and set the expiration to 1 year.
+   - Under **Repository access**, choose **Only select repositories**, then `daily-briefing`.
+   - Under **Permissions**, find **Actions** and set it to **Read and write**.
+   - Click **Generate token** and copy it. You won't see it again.
+2. **Create the timer:** sign up free at [cron-job.org](https://cron-job.org), then **Create cronjob**.
+   - URL: `https://api.github.com/repos/YOUR-GITHUB-NAME/daily-briefing/actions/workflows/daily.yml/dispatches`
+   - Schedule: every 4 hours.
+   - Under **Advanced**, set the request method to **POST**.
+   - Add three headers: `Authorization` = `Bearer YOUR-TOKEN`, `Accept` = `application/vnd.github+json`, `X-GitHub-Api-Version` = `2022-11-28`.
+   - Request body: `{"ref":"main"}`
+3. Save it, then click **Test run**. A new **Daily briefing** run should appear in your repo's **Actions** tab within seconds.
+
+GitHub's hourly check stays on as a backup.
+
+### 7. Optional extras (secrets)
 Each extra is **off** until you switch it on in `config.yaml` under `integrations:` and add its secrets in **Settings**, then **Secrets and variables**, then **Actions**, then **New repository secret**.
 
 | Extra | Switch in config.yaml | Secrets to add |
