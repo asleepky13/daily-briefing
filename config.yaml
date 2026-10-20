@@ -177,17 +177,110 @@ sources:
     - "World Socialist Web Site"
     - "MSN"            # re-publishes other outlets' stories
 
-# Market board in the header: previous close, change, and a 5-day line.
-# `yahoo:` takes any Yahoo Finance symbol; `boc:` takes a Bank of Canada Valet series.
+# Market Minute: the stock-market dashboard at the top of Finance (data: Yahoo Finance via yfinance, free,
+# delayed ~15 min). Symbols are Yahoo Finance tickers. Edit any list; order is display order.
 markets:
   enabled: true
-  symbols:
-    - { name: "S&P 500", yahoo: "^GSPC" }
-    - { name: "TSX", yahoo: "^GSPTSE" }
-    - { name: "Nasdaq", yahoo: "^IXIC" }
-    - { name: "Oil (WTI)", yahoo: "CL=F" }
-    - { name: "Bitcoin", yahoo: "BTC-USD" }
-    - { name: "USD/CAD", boc: "FXUSDCAD" }
+  indices:
+    - { t: "^DJI", name: "Dow Jones" }
+    - { t: "^GSPC", name: "S&P 500" }
+    - { t: "^IXIC", name: "Nasdaq" }
+    - { t: "^RUT", name: "Russell 2000" }
+  futures:
+    - { t: "YM=F", name: "Dow futures" }
+    - { t: "ES=F", name: "S&P 500 futures" }
+    - { t: "NQ=F", name: "Nasdaq-100 futures" }
+  sectors:
+    - { t: XLK, name: "Tech" }
+    - { t: XLF, name: "Financials" }
+    - { t: XLV, name: "Health Care" }
+    - { t: XLY, name: "Consumer Discretionary" }
+    - { t: XLP, name: "Consumer Staples" }
+    - { t: XLE, name: "Energy" }
+    - { t: XLI, name: "Industrials" }
+    - { t: XLB, name: "Materials" }
+    - { t: XLU, name: "Utilities" }
+    - { t: XLRE, name: "Real Estate" }
+    - { t: XLC, name: "Communication Services" }
+  macro:
+    - { t: "^VIX", name: "VIX" }
+    - { t: "^TNX", name: "10-yr yield", kind: yield }   # shown as % with the change in basis points
+    - { t: "CL=F", name: "WTI crude" }
+    - { t: "GC=F", name: "Gold" }
+    - { t: "DX-Y.NYB", name: "US dollar index" }
+    - { t: "BTC-USD", name: "Bitcoin" }
+  canada_enabled: false        # true adds the row below
+  canada:
+    - { t: "^GSPTSE", name: "S&P/TSX" }
+    - { t: "CAD=X", name: "USD/CAD" }
+  magnificent7: [AAPL, MSFT, NVDA, AMZN, GOOGL, META, TSLA]
+  movers_count: 5              # top gainers and losers shown
+  megacap_min_cap: 200e9       # mega-cap threshold in US dollars
+  # Extra names to match against headlines for "Why it moved" (the company name already matches).
+  aliases:
+    GOOGL: ["Google"]
+    GOOG: ["Google"]
+    META: ["Facebook"]
+  # --- mega-caps: rebuilt monthly by scripts/refresh_megacaps.py; edit freely, the next refresh rewrites this block ---
+  megacaps_refreshed: "2026-10-19"
+  megacaps:
+    - { t: NVDA, name: "Nvidia", sector: "Information Technology", shares: 2.415e+10 }
+    - { t: AAPL, name: "Apple", sector: "Information Technology", shares: 1.459e+10 }
+    - { t: GOOGL, name: "Alphabet", sector: "Communication Services", shares: 1.223e+10 }
+    - { t: GOOG, name: "Alphabet", sector: "Communication Services", shares: 1.223e+10 }
+    - { t: MSFT, name: "Microsoft", sector: "Information Technology", shares: 7.426e+09 }
+    - { t: AMZN, name: "Amazon", sector: "Consumer Discretionary", shares: 1.079e+10 }
+    - { t: META, name: "Meta Platforms", sector: "Communication Services", shares: 2.548e+09 }
+    - { t: AVGO, name: "Broadcom", sector: "Information Technology", shares: 4.774e+09 }
+    - { t: TSLA, name: "Tesla", sector: "Consumer Discretionary", shares: 3.95e+09 }
+    - { t: BRK-B, name: "Berkshire Hathaway", sector: "Financials", shares: 2.141e+09 }
+    - { t: LLY, name: "Eli Lilly", sector: "Health Care", shares: 8.917e+08 }
+    - { t: MU, name: "Micron Technology", sector: "Information Technology", shares: 1.131e+09 }
+    - { t: WMT, name: "Walmart", sector: "Consumer Staples", shares: 7.934e+09 }
+    - { t: JPM, name: "JPMorgan Chase", sector: "Financials", shares: 2.656e+09 }
+    - { t: AMD, name: "Advanced Micro Devices", sector: "Information Technology", shares: 1.632e+09 }
+    - { t: V, name: "Visa", sector: "Financials", shares: 1.877e+09 }
+    - { t: XOM, name: "ExxonMobil", sector: "Energy", shares: 4.112e+09 }
+    - { t: JNJ, name: "Johnson & Johnson", sector: "Health Care", shares: 2.41e+09 }
+    - { t: MA, name: "Mastercard", sector: "Financials", shares: 8.76e+08 }
+    - { t: ABBV, name: "AbbVie", sector: "Health Care", shares: 1.767e+09 }
+    - { t: INTC, name: "Intel", sector: "Information Technology", shares: 5.286e+09 }
+    - { t: PLTR, name: "Palantir Technologies", sector: "Information Technology", shares: 2.403e+09 }
+    - { t: COST, name: "Costco", sector: "Consumer Staples", shares: 4.431e+08 }
+    - { t: CVX, name: "Chevron", sector: "Energy", shares: 1.962e+09 }
+    - { t: CSCO, name: "Cisco", sector: "Information Technology", shares: 3.943e+09 }
+    - { t: KO, name: "Coca-Cola", sector: "Consumer Staples", shares: 4.303e+09 }
+    - { t: ORCL, name: "Oracle", sector: "Information Technology", shares: 3.032e+09 }
+    - { t: PG, name: "Procter & Gamble", sector: "Consumer Staples", shares: 2.324e+09 }
+    - { t: UNH, name: "UnitedHealth", sector: "Health Care", shares: 8.976e+08 }
+    - { t: MRK, name: "Merck", sector: "Health Care", shares: 2.467e+09 }
+    - { t: BAC, name: "Bank of America", sector: "Financials", shares: 6.993e+09 }
+    - { t: LRCX, name: "Lam Research", sector: "Information Technology", shares: 1.251e+09 }
+    - { t: CAT, name: "Caterpillar", sector: "Industrials", shares: 4.597e+08 }
+    - { t: AMAT, name: "Applied Materials", sector: "Information Technology", shares: 7.936e+08 }
+    - { t: GE, name: "GE Aerospace", sector: "Industrials", shares: 1.038e+09 }
+    - { t: PM, name: "Philip Morris International", sector: "Consumer Staples", shares: 1.559e+09 }
+    - { t: HD, name: "Home Depot", sector: "Consumer Discretionary", shares: 9.977e+08 }
+    - { t: NFLX, name: "Netflix", sector: "Communication Services", shares: 4.164e+09 }
+    - { t: DELL, name: "Dell Technologies", sector: "Information Technology", shares: 6.358e+08 }
+    - { t: PANW, name: "Palo Alto Networks", sector: "Information Technology", shares: 8.18e+08 }
+    - { t: MS, name: "Morgan Stanley", sector: "Financials", shares: 1.571e+09 }
+    - { t: RTX, name: "RTX", sector: "Industrials", shares: 1.348e+09 }
+    - { t: GS, name: "Goldman Sachs", sector: "Financials", shares: 2.912e+08 }
+    - { t: TXN, name: "Texas Instruments", sector: "Information Technology", shares: 9.132e+08 }
+    - { t: TMO, name: "Thermo Fisher Scientific", sector: "Health Care", shares: 3.697e+08 }
+    - { t: WFC, name: "Wells Fargo", sector: "Financials", shares: 3.002e+09 }
+    - { t: GEV, name: "GE Vernova", sector: "Industrials", shares: 2.663e+08 }
+    - { t: CRWD, name: "CrowdStrike", sector: "Information Technology", shares: 1.024e+09 }
+    - { t: LIN, name: "Linde", sector: "Materials", shares: 4.61e+08 }
+    - { t: ANET, name: "Arista Networks", sector: "Information Technology", shares: 1.261e+09 }
+    - { t: AMGN, name: "Amgen", sector: "Health Care", shares: 5.406e+08 }
+    - { t: IBM, name: "IBM", sector: "Information Technology", shares: 9.421e+08 }
+    - { t: KLAC, name: "KLA", sector: "Information Technology", shares: 1.305e+09 }
+    - { t: AXP, name: "American Express", sector: "Financials", shares: 6.753e+08 }
+    - { t: MRVL, name: "Marvell Technology", sector: "Information Technology", shares: 8.987e+08 }
+    - { t: C, name: "Citigroup", sector: "Financials", shares: 1.677e+09 }
+  # --- end mega-caps ---
 
 # Optional extras. Each needs secrets (see .env.example / README).
 integrations:

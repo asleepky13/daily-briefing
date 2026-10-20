@@ -102,6 +102,16 @@ Write AND, OR and NOT in **capitals**. Matching ignores upper/lower case and onl
 ```
 Add `require_keyword_match: false` to keep everything a feed publishes. For a page with no feed, use `type: html` with CSS `selectors`; the CP24 entry is a working example.
 
+**Market Minute (top of Finance):** a 60-second stock-market recap built from free Yahoo Finance data (via `yfinance`, delayed ~15 min). Everything it tracks lives under `markets:` in `config.yaml`:
+- `indices`, `futures`, `sectors`, `macro`: Yahoo tickers and display names. Order is display order.
+- `canada_enabled: true` adds the S&P/TSX and USD/CAD row.
+- `magnificent7`: the tickers in the Magnificent 7 row, e.g. `[AAPL, MSFT, NVDA, AMZN, GOOGL, META, TSLA]`.
+- `megacap_min_cap`: the mega-cap threshold in dollars (default `200e9`).
+- `megacaps`: the mega-cap list. `scripts/refresh_megacaps.py` rebuilds it from current market caps once a month (the workflow runs it automatically); run `python scripts/refresh_megacaps.py --force` to rebuild now. You can also add or remove lines by hand; each needs `t` (ticker), `name`, `sector` and `shares` (shares outstanding, used to compute market cap).
+- `aliases`: extra names to look for when matching a mover to a headline (e.g. `GOOGL: ["Google"]`).
+
+The 6 p.m. (after-close) run is the edition of record: it's saved as `data/markets/YYYY-MM-DD.json` and shown on that day's archive page. If Yahoo fails and the Stooq fallback can't fill the gap, the last good snapshot stays up with a "refresh failed" note.
+
 **Publisher names:** under `sources:`, `rename` tidies how outlets are shown (e.g. `"reuters.com": "Reuters"`) and `block` hides an outlet everywhere.
 
 **Local region:** change `region:` (city, province, country). The Google News queries in the Local section fill them in automatically. You'll also want to swap in your city's own outlets.
@@ -148,5 +158,6 @@ config.yaml ─▶ fetch.py ─▶ parse.py ─▶ filter.py ─▶ dedupe.py �
 - **Scraped pages:** `type: html` sources break when the site redesigns. `validate_feeds.py` will flag them.
 - **Market data:** Yahoo Finance's chart endpoint is free but unofficial and can change or block without notice. If it fails, the board simply hides. USD/CAD comes from the official Bank of Canada API. Figures are the previous close, not live, and aren't investment advice.
 - **Duplicate detection** has no AI: it compares wording and shared names and numbers ("Gemini 4"). Rarely, two near-identical press releases from one company family are merged, or two angles on one story stay separate.
+- **Market data:** Yahoo Finance is free but unofficial and can rate-limit GitHub's servers. The Stooq fallback currently returns errors from its free CSV endpoints, so in practice the "keep the last good snapshot" safety net is what covers a Yahoo outage. Market caps are shares × price from the monthly refresh, so they drift slightly between refreshes.
 - **Search:** today's search covers headlines, snippets and keywords. Archive search covers headlines and sources only, to keep the download small.
 - GitHub disables scheduled workflows in repos with no activity for 60 days. The daily data commits normally prevent this.

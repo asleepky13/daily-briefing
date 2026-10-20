@@ -38,9 +38,15 @@ jobs:
       - name: Restore HTTP cache (ETag / Last-Modified)
         uses: actions/cache@v4
         with:
-          path: .cache/http
+          path: |
+            .cache/http
+            .cache/yf
           key: http-cache-${{ github.run_id }}
           restore-keys: http-cache-
+
+      - name: Refresh the mega-cap list (monthly; skips itself otherwise)
+        continue-on-error: true
+        run: python scripts/refresh_megacaps.py
 
       - name: Fetch, filter and build
         id: run
@@ -61,7 +67,7 @@ jobs:
         run: |
           git config user.name "daily-briefing-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A data
+          git add -A data config.yaml
           if git diff --cached --quiet; then echo "No data changes"; exit 0; fi
           git commit -m "Briefing $(TZ=America/Toronto date +%F)"
           for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep 5; done

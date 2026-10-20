@@ -19,7 +19,7 @@ from zoneinfo import ZoneInfo
 import yaml
 from dotenv import load_dotenv
 
-from pipeline import build, integrations, markets
+from pipeline import build, integrations, market_minute
 from pipeline.dedupe import cluster, link_previous, merge_exact
 from pipeline.fetch import FetchResult, fetch_all
 from pipeline.filter import apply_source_rules, assign_sections, compile_sections, keyword_report, recent
@@ -107,6 +107,12 @@ def run(config: dict, *, dry_run: bool, use_cache: bool = True) -> int:
         for s in sec["items"]:
             s.pop("feed_section", None)
             s.pop("from_dedicated_feed", None)
+    try:  # the Market Minute must never take the news down with it
+        minute = market_minute.build(config, now, sections.get("finance", {}).get("items", []),
+                                     previous=market_minute.load_json(market_minute.DIR / "latest.json", None))
+    except Exception as e:  # noqa: BLE001
+        log.error("market_minute_failed error=%r", f"{type(e).__name__}: {e}"[:200])
+        minute = None
     day = {
         "date": today.isoformat(),
         "generated_at": now.isoformat(),
@@ -115,7 +121,7 @@ def run(config: dict, *, dry_run: bool, use_cache: bool = True) -> int:
                     "error": r.error} for r in results],
         "sections": sections,
         "keywords": keyword_report(fresh, compiled, matched),
-        "markets": markets.snapshot(config),
+        "markets": market_minute.header_board(minute),
     }
     if dry_run:
         for sec in sections.values():
@@ -126,6 +132,7 @@ def run(config: dict, *, dry_run: bool, use_cache: bool = True) -> int:
         print("\nDry run: nothing written.")
         return 0
 
+    market_minute.save(minute, today)
     build.write_day(day)
     index = build.update_index(datetime.fromisoformat(day["date"]).date(), config.get("retention_days", 90))
     build.render_site(config)

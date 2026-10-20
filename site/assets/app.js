@@ -264,7 +264,7 @@
     const el = document.getElementById("board");
     // dates in Toronto time: Bitcoin's 03:30 UTC quote is still the previous evening here
     const asOf = quotes.map((q) => (q.as_of.length > 10 ? new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date(q.as_of)) : q.as_of)).sort().at(-1);
-    el.innerHTML = `<p class="board-label" id="board-label">Markets at previous close, ${esc(fmtShort(asOf))}</p><ul>${quotes.map((q) => {
+    el.innerHTML = `<p class="board-label" id="board-label">Markets, delayed ~15 min (${esc(fmtShort(asOf))})</p><ul>${quotes.map((q) => {
       const up = q.change_pct >= 0;
       return `<li class="tile"><span class="t-name">${esc(q.name)}</span><span class="t-val">${esc(fmtNum(q.price))}</span>
         <span class="t-delta ${up ? "up" : "down"}"><span aria-hidden="true">${up ? "▲" : "▼"}</span> ${up ? "+" : "−"}${Math.abs(q.change_pct).toFixed(2)}%<span class="vh"> ${up ? "up" : "down"} on the day</span></span>
@@ -272,6 +272,93 @@
     }).join("")}</ul>`;
     el.hidden = false;
     document.getElementById("markets-note").hidden = false;
+  };
+
+  // ── Market Minute: the 60-second market dashboard on Finance (data/markets/*.json, built by the pipeline) ──
+  const loadMinute = async (date) => {
+    try { return await getJSON(`data/markets/${date || "latest"}.json`); } catch { return null; }
+  };
+  const sgn = (x, d = 2) => `${x >= 0 ? "+" : "−"}${Math.abs(x).toFixed(d)}`;
+  const arrow = (x) => `<span aria-hidden="true">${x > 0 ? "▲" : x < 0 ? "▼" : "◆"}</span>`;
+  const move = (x, unit = "%") => `<span class="mv ${x > 0 ? "gain" : x < 0 ? "loss" : "flat"}">${arrow(x)} ${sgn(x)}${unit}</span>`;
+  const num = (v, d = 2) => v.toLocaleString("en-CA", { minimumFractionDigits: d, maximumFractionDigits: d });
+  const cap = (v) => (v >= 1e12 ? `$${(v / 1e12).toFixed(2)}T` : `$${Math.round(v / 1e9)}B`);
+  const etTime = (iso) => (iso.length <= 10 ? `${fmtShort(iso)} close`
+    : `${new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(new Date(iso))} ET`);
+  const heat = (pct) => { // diverging: neutral grey at 0, blue for gains, orange for losses; full strength at ±2%
+    const k = Math.min(1, Math.abs(pct) / 2) * 42;
+    return `background:color-mix(in srgb, var(${pct >= 0 ? "--gain-fill" : "--loss-fill"}) ${k.toFixed(0)}%, var(--heat-mid))`;
+  };
+
+  const minuteText = (m) => { // plain text for "Copy Market Minute"
+    const idx = m.indices.map((i) => `${i.name} ${num(i.price)} ${i.pct >= 0 ? "▲" : "▼"} ${sgn(i.pct)}%`).join(" | ");
+    const best = m.sectors[0], worst = m.sectors.at(-1);
+    const top = [...m.movers.gainers, ...m.movers.losers].sort((a, b) => Math.abs(b.pct) - Math.abs(a.pct))[0];
+    return [`Market Minute: ${m.state.label}, ${fmtShort(m.state.session)}`, "", m.take.join(" "), "", idx,
+      best && worst ? `Best sector: ${best.name} ${sgn(best.pct)}% / Worst: ${worst.name} ${sgn(worst.pct)}%` : "",
+      top ? `Biggest mega-cap mover: ${top.name} (${top.t}) ${sgn(top.pct)}%` : "",
+      m.macro.length ? m.macro.map((x) => `${x.name} ${x.kind === "yield" ? `${x.price.toFixed(2)}% (${sgn(x.bps, 0)} bp)` : `${sgn(x.pct)}%`}`).join(" | ") : "",
+      "", "Data delayed ~15 min via Yahoo Finance. For information only, not investment advice."].filter((l, i, a) => l || a[i - 1]).join("\n");
+  };
+
+  const renderMinute = (m) => {
+    if (!m || !m.indices?.length) return "";
+    const s = m.state, prominentFutures = ["premarket", "overnight", "closed"].includes(s.kind);
+    const tile = (i) => `<li class="mm-tile">
+        <p class="mm-name">${esc(i.name)}</p>
+        <p class="mm-level">${num(i.price)}</p>
+        <p class="mm-chg">${move(i.pct)} <span class="pts">${sgn(i.chg)} pts</span></p>
+        ${spark(i.spark, { w: 120, h: 30, label: `${i.name}, ${i.spark_kind} trend`, fmt: (v) => num(v) })}
+        <p class="mm-sub"><span>WTD ${i.wtd == null ? "–" : move(i.wtd)}</span><span>YTD ${i.ytd == null ? "–" : move(i.ytd)}</span></p>
+        <p class="mm-asof">${i.spark_kind === "intraday" ? "Intraday, " : "5-day, "}${etTime(i.as_of)}</p></li>`;
+    const chip = (x) => `<li><span class="mm-cn">${esc(x.name)}</span> <span class="mm-cv">${x.kind === "yield"
+      ? `${x.price.toFixed(2)}% ${move(x.bps, " bp")}` : `${num(x.price, x.price < 10 ? 4 : 2)} ${move(x.pct)}`}</span>
+      <span class="mm-asof">${etTime(x.as_of)}</span></li>`;
+    const moverRows = (rows) => rows.map((r) => `<tr><th scope="row"><span class="tk">${esc(r.t)}</span><span class="nm">${esc(r.name)}</span></th>
+        <td class="n">${num(r.price)}</td><td class="n">${move(r.pct)}</td><td class="n">${cap(r.cap)}</td><td class="sec-c">${esc(r.sector)}</td></tr>
+        ${r.why ? `<tr class="why"><td colspan="5">Why it moved: <a href="${esc(safeUrl(r.why.url))}" rel="noopener" target="_blank">${esc(r.why.title)}</a> <span class="mm-asof">${esc(r.why.source)}</span></td></tr>` : ""}`).join("");
+    const moverTable = (title, rows) => rows.length ? `<table class="mm-movers"><caption>${title}</caption>
+        <thead><tr><th scope="col">Company</th><th scope="col" class="n">Price</th><th scope="col" class="n">Change</th><th scope="col" class="n">Mkt cap</th><th scope="col">Sector</th></tr></thead>
+        <tbody>${moverRows(rows)}</tbody></table>` : "";
+    const b = m.breadth, total = b.adv + b.dec + b.unch;
+    return `<section class="mm" aria-labelledby="mm-h">
+      <div class="mm-head">
+        <div><h2 id="mm-h">Market Minute</h2>
+          <p class="mm-state"><strong>${esc(s.label)}</strong>${s.kind === "open" ? "" : ` <span>Session of ${esc(fmtShort(s.session))}</span>`}</p>
+          ${m.status === "stale" ? `<p class="mm-alert">${esc(m.stale_note)}</p>` : ""}
+          ${s.note && s.kind !== "after_close" ? `<p class="mm-note">${esc(s.note)}</p>` : ""}</div>
+        <button type="button" class="btn" id="mm-copy">Copy Market Minute</button>
+      </div>
+      <div class="mm-take"><h3>The 60-second take</h3><p>${m.take.map(esc).join(" ")}</p></div>
+      ${prominentFutures && m.futures.length ? `<ul class="mm-fut big" aria-label="Futures">${m.futures.map(chip).join("")}</ul>` : ""}
+      <ul class="mm-idx" aria-label="Major indexes">${m.indices.map(tile).join("")}</ul>
+      ${!prominentFutures && m.futures.length ? `<ul class="mm-fut" aria-label="Futures">${m.futures.map(chip).join("")}</ul>` : ""}
+      <div class="mm-grid">
+        <section class="mm-heat" aria-labelledby="mm-sec-h"><h3 id="mm-sec-h">Sectors <span>vs the S&amp;P 500</span></h3>
+          <ol>${m.sectors.map((x, k) => `<li style="${heat(x.pct)}"><span class="mm-cn">${esc(x.name)}</span>
+            ${k < 3 ? `<span class="tag-o">Outperformer</span>` : k >= m.sectors.length - 3 ? `<span class="tag-l">Laggard</span>` : ""}
+            <span class="mm-cv">${move(x.pct)}</span><span class="rel">${sgn(x.rel)} pts vs S&amp;P</span></li>`).join("")}</ol></section>
+        <section class="mm-mov" aria-labelledby="mm-mov-h"><h3 id="mm-mov-h">Mega-cap movers <span>${cap(m.min_cap || 2e11)}+ companies</span></h3>
+          ${moverTable("Top gainers", m.movers.gainers)}${moverTable("Top losers", m.movers.losers)}
+          ${m.mag7?.length ? `<p class="mm-sub-h">Magnificent 7</p><ul class="mm-chips">${m.mag7.map((x) => `<li><span class="tk">${esc(x.t)}</span> ${move(x.pct)}</li>`).join("")}</ul>` : ""}
+          ${total ? `<p class="mm-sub-h">Breadth: ${b.adv} up, ${b.dec} down${b.unch ? `, ${b.unch} unchanged` : ""} of ${total}</p>
+            <div class="mm-breadth" role="img" aria-label="${b.adv} mega-caps up, ${b.dec} down"><span class="adv" style="flex:${b.adv}"></span><span class="dec" style="flex:${b.dec}"></span></div>` : ""}
+        </section>
+      </div>
+      ${m.macro.length ? `<h3 class="mm-row-h">Macro</h3><ul class="mm-macro">${m.macro.map(chip).join("")}</ul>` : ""}
+      ${m.canada?.length ? `<h3 class="mm-row-h">Canada</h3><ul class="mm-macro">${m.canada.map(chip).join("")}</ul>` : ""}
+      <p class="mm-foot">Data delayed ~15 min via Yahoo Finance. For information only, not investment advice. Updated ${esc(etTime(m.generated_at))}.</p>
+    </section>`;
+  };
+
+  const mountMinute = async (el, date) => {
+    const m = await loadMinute(date);
+    if (!m || !el.isConnected) return;
+    el.innerHTML = renderMinute(m);
+    el.querySelector("#mm-copy")?.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(minuteText(m)); toast("Copied Market Minute"); }
+      catch { toast("Copy blocked by the browser."); }
+    });
   };
 
   // ── rendering ────────────────────────────────────────
@@ -416,6 +503,7 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
         <label class="check"><input type="checkbox" id="all-days"> Search all archived days</label>
         ${exportButtons}
       </div>
+      ${DATE ? `<div id="mm-mount"></div>` : ""}
       <div id="results"></div>`;
     const results = document.getElementById("results");
     const q = document.getElementById("q");
@@ -465,6 +553,7 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
     q.addEventListener("input", debounce(run, 150));
     allDays.addEventListener("change", run);
     run();
+    if (DATE) mountMinute(document.getElementById("mm-mount"), DATE); // that day's closing Market Minute
   };
 
   const renderSection = () => {
@@ -484,6 +573,7 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
         ${zh ? `<p class="sign" lang="zh-Hant" aria-hidden="true">${esc(zh)}</p>` : "<span></span>"}
         <div><h1 class="page">${esc(sec.name)}</h1>${whatMatters(sec)}</div>
       </div>
+      ${SECTION === "finance" ? `<div id="mm-mount"></div>` : ""}
       ${trendsPanel(SECTION, sec.name)}
       <div class="toolbar">
         <label class="grow">Search ${esc(sec.name)}<input type="search" id="q" autocomplete="off" value="${esc(state.q)}"></label>
@@ -537,6 +627,7 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
       apply();
     });
     apply();
+    if (SECTION === "finance") mountMinute(document.getElementById("mm-mount"), DATE);
   };
 
   const renderArchive = (index) => {
