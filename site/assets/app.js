@@ -383,10 +383,11 @@
     const top = briefPicks(sec);
     if (!top.length) return "";
     return `<section class="brief-fp" aria-labelledby="brief-h"><h2 id="brief-h">The Brief <span>the biggest finance stories, most-covered first</span></h2>
-      <ol>${top.map((s) => `<li><h3><a href="${esc(safeUrl(s.url))}" rel="noopener" target="_blank">${esc(s.title)}</a></h3>
+      <ol>${top.map((s) => `<li><details><summary data-story><h3>${esc(s.title)}</h3></summary>
         <p>${esc(s.summary)}</p>
         <p class="meta"><span class="src">${esc(s.source)}</span>${s.also_covered_by?.length ? `<span>${s.also_covered_by.length + 1} outlets</span>` : ""}
-          <time datetime="${esc(s.published_at)}">${ago(s.published_at)}</time>${trendTag(s)}</p></li>`).join("")}</ol></section>`;
+          <time datetime="${esc(s.published_at)}">${ago(s.published_at)}</time>${trendTag(s)}</p>
+        <p class="read"><a href="${esc(safeUrl(s.url))}" rel="noopener" target="_blank">Read at ${esc(s.source)}</a></p></details></li>`).join("")}</ol></section>`;
   };
   const dealsFrom = (sec, skip) => sec.items.filter((s) => !skip.has(s.url) && s.matched_keywords.some((k) => DEAL_WORDS.has(k))).slice(0, 6);
 
@@ -421,18 +422,18 @@
   };
 
   const card = (s, ref, active = null) => `
-    <li class="card" data-sec="${esc(s.section)}">
-      <div class="card-head">
-        <h3><a href="${esc(safeUrl(s.url))}" rel="noopener" target="_blank" data-story>${esc(s.title)}</a></h3>
-        ${saveBtn(s)}
-      </div>
-      ${storyMeta(s, ref)}
+    <li class="card" data-sec="${esc(s.section)}"><details>
+      <summary data-story><span class="hl-t">${esc(s.title)}</span>${isNew(s) ? `<span class="new" title="New since your last visit"><span aria-hidden="true">新</span><span class="vh">New</span></span>` : ""}</summary>
+      <div class="card-body">
+      <div class="card-head">${storyMeta(s, ref)}${saveBtn(s)}</div>
       ${s.ai_summary || s.summary ? `<p class="snip">${esc(s.ai_summary || s.summary)}</p>` : ""}
+      <p class="read"><a href="${esc(safeUrl(s.url))}" rel="noopener" target="_blank">Read at ${esc(s.source)}</a></p>
       ${s.matched_keywords?.length ? `<ul class="chips" aria-label="Matched keywords">${s.matched_keywords.map((k) => (active
         ? `<li><button type="button" class="chip" data-kw="${esc(k)}" aria-pressed="${active.has(k)}">${esc(k)}</button></li>`
         : `<li><span class="chip">${esc(k)}</span></li>`)).join("")}</ul>` : ""}
       ${alsoLine(s)}
       ${crossLinks(s)}
+      </div></details>
     </li>`;
 
   const whatMatters = (sec) => {
@@ -612,7 +613,7 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
         ${zh ? `<p class="sign" lang="zh-Hant" aria-hidden="true">${esc(zh)}</p>` : "<span></span>"}
         <div><h1 class="page">${esc(sec.name)}</h1>${whatMatters(sec)}</div>
       </div>
-      ${SECTION === "finance" ? `${renderBrief(sec)}<div id="mm-mount"></div>` : ""}
+      ${SECTION === "finance" ? `<div id="mm-mount"></div>${renderBrief(sec)}` : ""}
       ${trendsPanel(SECTION, sec.name)}
       <div class="toolbar">
         <label class="grow">Search ${esc(sec.name)}<input type="search" id="q" autocomplete="off" value="${esc(state.q)}"></label>
@@ -1242,14 +1243,14 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
   document.getElementById("keys-btn").addEventListener("click", () => keysDialog.showModal());
   document.addEventListener("keydown", (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey || e.target.closest?.("input, select, textarea") || keysDialog.open) return;
-    const links = [...main.querySelectorAll("a[data-story]")];
+    const links = [...main.querySelectorAll("[data-story]")];
     const at = links.indexOf(document.activeElement);
     const go = (i) => { const el = links[Math.max(0, Math.min(links.length - 1, i))]; el?.focus(); el?.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" }); };
     const sectionKeys = [...document.querySelectorAll(".mast nav a[data-key]")].filter((a) => day?.sections[a.dataset.key]);
     if (e.key === "/") { e.preventDefault(); document.getElementById("q")?.focus(); }
     else if (e.key === "j") go(at + 1);
     else if (e.key === "k") go(at < 0 ? 0 : at - 1);
-    else if (e.key === "o" && at >= 0) links[at].click();
+    else if (e.key === "o" && at >= 0) links[at].click(); // a headline link opens; a compact story expands
     else if (e.key === "s" && at >= 0) links[at].closest("li")?.querySelector("[data-save]")?.click();
     else if (e.key === "t") toggleTheme();
     else if (e.key === "?") keysDialog.showModal();

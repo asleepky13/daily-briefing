@@ -457,13 +457,33 @@ input[type="search"]:focus, select:focus, input[type="date"]:focus { border-colo
 .mm-breadth .adv { background: var(--gain-fill); } .mm-breadth .dec { background: var(--loss-fill); }
 .mm-row-h { margin-top: .5rem !important; }
 .mm-foot { margin: .5rem 0 0; font: 500 .9rem var(--ui); color: var(--muted); }
+/* Compact stories: headline only; details open on click */
+.card { padding: 0; }
+.card summary { list-style: none; cursor: pointer; padding: .8rem 1.25rem; display: flex; gap: .6rem; align-items: baseline;
+  font: 600 1.15rem/1.32 var(--read); text-wrap: balance; }
+.card summary::-webkit-details-marker { display: none; }
+.card summary::after { content: "+"; margin-left: auto; font: 700 1.2rem/1 var(--ui); color: var(--muted); }
+.card details[open] summary::after { content: "\2212"; }
+.card summary:hover .hl-t { text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--jade) 55%, transparent); }
+.card summary:focus-visible { outline: 2px solid var(--jade); outline-offset: -2px; }
+.card-body { padding: 0 1.25rem 1rem; }
+.card .card-head { align-items: center; }
+.card .save { margin: 0 -.75rem 0 0; }
+.read { margin: .3rem 0 0; font: 600 1rem var(--ui); }
+.stories { gap: .5rem; }
+.brief-fp summary { list-style: none; cursor: pointer; }
+.brief-fp summary::-webkit-details-marker { display: none; }
+.brief-fp summary h3 { display: inline; }
+.brief-fp summary:hover h3 { text-decoration: underline; }
+.brief-fp li { grid-template-columns: 1.9rem 1fr; }
+.brief-fp li::before { grid-row: auto; }
 /* The Brief: an FT-style front page of the biggest finance stories */
 .brief-fp { margin: 0 0 1.5rem; padding: 1.1rem 1.25rem; background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--finance); }
 .brief-fp h2 { font: 700 1.9rem/1 var(--ui); margin: 0 0 .9rem; }
 .brief-fp h2 span, .mm-world h3 span, .mm-co h3 span { font: 500 1rem var(--ui); color: var(--muted); }
 .brief-fp ol { margin: 0; padding: 0; list-style: none; counter-reset: b; display: grid; gap: .9rem 1.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); }
 .brief-fp li { counter-increment: b; display: grid; grid-template-columns: 1.9rem 1fr; align-content: start; }
-.brief-fp li::before { content: counter(b); grid-row: span 3; font: 700 1.5rem/1.1 var(--ui); color: var(--finance); }
+.brief-fp li::before { content: counter(b); font: 700 1.5rem/1.1 var(--ui); color: var(--finance); }
 .brief-fp li:first-child { grid-column: 1 / -1; }
 .brief-fp li:first-child h3 { font-size: 1.55rem; }
 .brief-fp h3 { margin: 0 0 .3rem; font: 600 1.15rem/1.3 var(--read); text-wrap: balance; }
