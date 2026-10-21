@@ -13,7 +13,8 @@ def score(item: dict, now: datetime, window_hours: float, priority: set[str]) ->
     recency = 3 * max(0.0, 1 - age_h / window_hours)
     coverage = 3 * len(item["also_covered_by"])
     momentum = 2 if (item.get("trend") or {}).get("state") in ("breaking", "rising") else 0
-    return round(coverage + keyword_weight(item["matched_keywords"], priority) + recency + momentum, 2)
+    authority = 1.5 * item.get("weight", 0)  # feed `weight` in config: wires and major financial papers
+    return round(coverage + keyword_weight(item["matched_keywords"], priority) + recency + momentum + authority, 2)
 
 
 def build_sections(stories: list[dict], config: dict, compiled: dict, now: datetime) -> dict[str, dict]:

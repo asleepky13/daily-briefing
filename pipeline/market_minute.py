@@ -227,6 +227,22 @@ def megacap_quotes(universe: list[dict], quotes: dict, min_cap: float) -> list[d
     return out
 
 
+def company_news(universe: list[dict], items: list[dict], aliases: dict, n: int = 8) -> list[dict]:
+    """Newest headline about each mega-cap that has one (same strict matching as "why it moved"), newest first."""
+    out = []
+    for c in universe:
+        hit = match_headline(c["t"], c["name"], items, aliases.get(c["t"], []))
+        if hit:
+            when = next((it["published_at"] for it in items if it["url"] == hit["url"]), "")
+            out.append({"t": c["t"], "name": c["name"], **hit, "published_at": when})
+    seen, uniq = set(), []
+    for r in sorted(out, key=lambda r: r["published_at"], reverse=True):
+        if r["url"] not in seen:  # one story can name two giants; show it once
+            seen.add(r["url"])
+            uniq.append(r)
+    return uniq[:n]
+
+
 def rank_movers(rows: list[dict], n: int) -> dict:
     ranked = sorted(rows, key=lambda r: r["pct"], reverse=True)
     return {"gainers": [r for r in ranked if r["pct"] > 0][:n],
@@ -364,6 +380,15 @@ def write_take(snap: dict, seed: str) -> list[str]:
             f"The biggest mega-cap move: {top['name']}, which {v}{amount}.",
             f"{top['name']} {v}{amount}, the largest move among mega-caps.",
         ]))
+    world = {w["t"]: w for w in snap.get("world", [])}
+    eu, asia = world.get("^STOXX"), world.get("^N225") or world.get("^HSI")
+    if eu and asia:
+        verb = lambda w: ("rose" if w["pct"] > 0 else "fell" if w["pct"] < 0 else "was flat") if magnitude(w["pct"]) != "flat" else "was little changed"
+        amt = lambda w: "" if magnitude(w["pct"]) == "flat" else f" {p(w['pct'])}"
+        out.append(_pick(seed, "world", [
+            f"Overseas, Europe's {eu['name']} {verb(eu)}{amt(eu)} and {asia['name'].split(' (')[0]} {verb(asia)}{amt(asia)}.",
+            f"Abroad, the {eu['name']} {verb(eu)}{amt(eu)} while {asia['name'].split(' (')[0]} {verb(asia)}{amt(asia)}.",
+        ]))
     macro = {m["t"]: m for m in snap.get("macro", [])}
     went = lambda x: ("is up" if x > 0 else "is down") if live else ("rose" if x > 0 else "fell")
     cands = []  # (how notable, sentence): VIX moves of 5%, 5 bp in the 10-year and 2% in oil count as equally notable
@@ -401,7 +426,8 @@ def build(config: dict, now: datetime, headlines: list[dict], fetch=fetch_yahoo,
     state = market_state(now)
     session = state["session"]
     groups = {"index": m.get("indices", []), "future": m.get("futures", []), "sector": m.get("sectors", []),
-              "macro": m.get("macro", []), "canada": m.get("canada", []) if m.get("canada_enabled") else []}
+              "macro": m.get("macro", []), "canada": m.get("canada", []) if m.get("canada_enabled") else [],
+              "world": m.get("world", []), "fx": m.get("fx", []), "commodity": m.get("commodities", [])}
     universe = m.get("megacaps", [])
     mag7 = m.get("magnificent7", [])
     stock_syms = list(dict.fromkeys([c["t"] for c in universe] + mag7))
@@ -454,6 +480,8 @@ def build(config: dict, now: datetime, headlines: list[dict], fetch=fetch_yahoo,
     fetched_at = now.astimezone(timezone.utc).isoformat(timespec="minutes")
 
     def as_of(t: str) -> str:
+        if kinds.get(t) == "world":  # overseas markets: their own last close, not New York's clock
+            return quotes[t]["date"]
         if t in intraday:
             return intraday[t][-1][0]
         if state["kind"] == "open":
@@ -478,7 +506,11 @@ def build(config: dict, now: datetime, headlines: list[dict], fetch=fetch_yahoo,
             "futures": [row(s["t"], "future") for s in groups["future"] if s["t"] in quotes],
             "macro": [row(s["t"], "macro") | ({"kind": "yield", "bps": round(quotes[s["t"]]["chg"] * 100)} if s.get("kind") == "yield" else {})
                       for s in groups["macro"] if s["t"] in quotes],
-            "canada": [row(s["t"], "canada") for s in groups["canada"] if s["t"] in quotes] or None}
+            "canada": [row(s["t"], "canada") for s in groups["canada"] if s["t"] in quotes] or None,
+            # each overseas market reports its own latest close (as_of = that date), so no same-session check
+            "world": [row(s["t"], "world") | {"region": s.get("region", "")} for s in groups["world"] if s["t"] in quotes],
+            "fx": [row(s["t"], "fx") for s in groups["fx"] if s["t"] in quotes],
+            "commodities": [row(s["t"], "commodity") for s in groups["commodity"] if s["t"] in quotes]}
     sp_pct = quotes["^GSPC"]["pct"] if "^GSPC" in quotes else 0.0
     snap["sectors"] = sorted(({**row(s["t"], "sector"), "rel": round(quotes[s["t"]]["pct"] - sp_pct, 2)}
                               for s in groups["sector"] if s["t"] in quotes), key=lambda r: r["pct"], reverse=True)
@@ -489,6 +521,7 @@ def build(config: dict, now: datetime, headlines: list[dict], fetch=fetch_yahoo,
         r["why"] = match_headline(r["t"], r["name"], headlines, aliases.get(r["t"], []))
         r.pop("closes", None)
     snap["movers"] = movers
+    snap["company_news"] = company_news(universe, headlines, aliases)
     by_t = {r["t"]: r for r in megas}
     snap["mag7"] = [{"t": t, "pct": quotes[t]["pct"], "price": quotes[t]["price"]} for t in mag7 if t in quotes]
     snap["breadth"] = breadth(megas)
@@ -500,7 +533,7 @@ def build(config: dict, now: datetime, headlines: list[dict], fetch=fetch_yahoo,
     return snap
 
 
-CARRY = ("futures", "sectors", "macro", "mag7")
+CARRY = ("futures", "sectors", "macro", "mag7", "world", "fx", "commodities")
 
 
 def carry_over(snap: dict, previous: dict | None) -> None:
@@ -519,7 +552,8 @@ def carry_over(snap: dict, previous: dict | None) -> None:
         carried.append("movers")
     if carried:
         when = datetime.fromisoformat(previous["generated_at"]).astimezone(ET)
-        names = {"futures": "futures", "sectors": "sectors", "macro": "macro", "mag7": "Magnificent 7", "movers": "mega-cap movers"}
+        names = {"futures": "futures", "sectors": "sectors", "macro": "macro", "mag7": "Magnificent 7", "movers": "mega-cap movers",
+                 "world": "world markets", "fx": "currencies", "commodities": "commodities"}
         snap["partial_note"] = f"{', '.join(names[k] for k in carried).capitalize()} as of {fmt_clock(when)} ET: this refresh only partly loaded"
         log.warning("markets_partial carried=%s", ",".join(carried))
 

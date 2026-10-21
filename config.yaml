@@ -52,30 +52,37 @@ sections:
       - '"interest rate" OR "rate cut" OR "rate hike" OR rates OR bonds OR yields'
       - inflation OR cpi OR recession OR gdp OR jobs OR unemployment
       - re:raised \$\d+
+      - economy OR economic OR economists OR tariffs OR "trade war" OR "trade deal" OR exports OR imports
+      - banks OR banking OR lender OR lenders OR debt OR default OR "credit rating" OR downgrade OR bankruptcy
+      - oil OR opec OR gold OR dollar OR currency OR yen OR yuan OR euro OR commodities OR "treasury yields"
+      - layoffs OR "job cuts" OR ceo OR "chief executive" OR regulators OR antitrust OR sanctions
     exclude:
       - opinion OR horoscope OR "sponsored content"
-    priority: [acquisition, merger, ipo, "rate cut", "rate hike"]
+      # investing listicles and corporate housekeeping: noise for a high-level overview
+      - '"stocks to buy" OR "stock to buy" OR "should you buy" OR "buy now" OR "millionaire" OR "passive income" OR "motley fool" OR "forever stock" OR "top pick" OR "price prediction"'
+      - '"conference call" OR "to host" OR webcast OR "declares quarterly dividend" OR "declares dividend" OR "announces dividend" OR "investor day"'
+      - '"submit a question" OR "ask our" OR quiz OR podcast OR newsletter OR "live blog" OR crossword'
+    priority: [acquisition, merger, ipo, "rate cut", "rate hike", recession, tariffs, default, bankruptcy]
+    # `weight` (0-3) ranks a feed's stories higher: wire services and the big financial papers first.
     feeds:
-      - { name: "CNBC Top News", type: rss, url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114" }
+      - { name: "CNBC Top News", type: rss, url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114", weight: 2 }
       - { name: "CNBC Finance", type: rss, url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000664", require_keyword_match: false }
-      - { name: "MarketWatch", type: rss, url: "https://feeds.content.dowjones.io/public/rss/mw_topstories" }
+      - { name: "MarketWatch", type: rss, url: "https://feeds.content.dowjones.io/public/rss/mw_topstories", weight: 1 }
       - { name: "Yahoo Finance", type: rss, url: "https://feeds.finance.yahoo.com/rss/2.0/headline?s=%5EGSPC,%5EGSPTSE&region=US&lang=en-US" }
-      - { name: "Financial Post", type: rss, url: "https://financialpost.com/feed" }
-      - { name: "PR Newswire", type: rss, url: "https://www.prnewswire.com/rss/financial-services-latest-news/financial-services-latest-news-list.rss" }
-      - { name: "SEC 8-K filings", type: atom, url: "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=8-K&company=&dateb=&owner=include&start=0&count=40&output=atom", require_keyword_match: false }
-      - { name: "Reuters (via Google News)", type: rss, query: "site:reuters.com business OR markets when:1d" }
-      - { name: "Bloomberg (via Google News)", type: rss, query: "site:bloomberg.com markets when:1d" }
-      - { name: "WSJ Markets", type: rss, url: "https://feeds.content.dowjones.io/public/rss/RSSMarketsMain", require_keyword_match: false }
-      - { name: "Financial Times Markets", type: rss, url: "https://www.ft.com/markets?format=rss", require_keyword_match: false }
-      - { name: "CNBC Markets", type: rss, url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258", require_keyword_match: false }
-      - { name: "The Globe and Mail Business", type: rss, url: "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/business/" }
-      - { name: "BNN Bloomberg", type: rss, url: "https://www.bnnbloomberg.ca/arc/outboundfeeds/rss/" }
-      - { name: "NYT Business", type: rss, url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml" }
-      - { name: "The Guardian Business", type: rss, url: "https://www.theguardian.com/business/rss" }
+      - { name: "Financial Post", type: rss, url: "https://financialpost.com/feed", weight: 1 }
+      - { name: "Reuters (via Google News)", type: rss, query: "site:reuters.com business OR markets when:1d", weight: 3 }
+      - { name: "Bloomberg (via Google News)", type: rss, query: "site:bloomberg.com markets when:1d", weight: 3 }
+      - { name: "WSJ Markets", type: rss, url: "https://feeds.content.dowjones.io/public/rss/RSSMarketsMain", require_keyword_match: false, weight: 3 }
+      - { name: "Financial Times Markets", type: rss, url: "https://www.ft.com/markets?format=rss", require_keyword_match: false, weight: 3 }
+      - { name: "CNBC Markets", type: rss, url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258", require_keyword_match: false, weight: 2 }
+      - { name: "The Globe and Mail Business", type: rss, url: "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/business/", weight: 2 }
+      - { name: "BNN Bloomberg", type: rss, url: "https://www.bnnbloomberg.ca/arc/outboundfeeds/rss/", weight: 2 }
+      - { name: "NYT Business", type: rss, url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml", weight: 2 }
+      - { name: "The Guardian Business", type: rss, url: "https://www.theguardian.com/business/rss", weight: 1 }
       - { name: "Fortune", type: rss, url: "https://fortune.com/feed/" }
       - { name: "Seeking Alpha", type: rss, url: "https://seekingalpha.com/market_currents.xml" }
       - { name: "Investing.com", type: rss, url: "https://www.investing.com/rss/news_25.rss" }
-      - { name: "Federal Reserve", type: rss, url: "https://www.federalreserve.gov/feeds/press_all.xml", require_keyword_match: false }
+      - { name: "Federal Reserve", type: rss, url: "https://www.federalreserve.gov/feeds/press_all.xml", require_keyword_match: false, weight: 2 }
 
   tech:
     name: "Tech"
@@ -255,6 +262,31 @@ markets:
     - { t: "GC=F", name: "Gold" }
     - { t: "DX-Y.NYB", name: "US dollar index" }
     - { t: "BTC-USD", name: "Bitcoin" }
+  world:                       # region groups the board; each index shows its own latest close
+    - { t: "^STOXX", name: "Stoxx 600", region: "Europe" }
+    - { t: "^FTSE", name: "FTSE 100 (UK)", region: "Europe" }
+    - { t: "^GDAXI", name: "DAX (Germany)", region: "Europe" }
+    - { t: "^FCHI", name: "CAC 40 (France)", region: "Europe" }
+    - { t: "^N225", name: "Nikkei 225 (Japan)", region: "Asia-Pacific" }
+    - { t: "^HSI", name: "Hang Seng (Hong Kong)", region: "Asia-Pacific" }
+    - { t: "000001.SS", name: "Shanghai Composite", region: "Asia-Pacific" }
+    - { t: "^KS11", name: "KOSPI (South Korea)", region: "Asia-Pacific" }
+    - { t: "^BSESN", name: "Sensex (India)", region: "Asia-Pacific" }
+    - { t: "^AXJO", name: "ASX 200 (Australia)", region: "Asia-Pacific" }
+    - { t: "^GSPTSE", name: "S&P/TSX (Canada)", region: "Americas" }
+    - { t: "^BVSP", name: "Bovespa (Brazil)", region: "Americas" }
+    - { t: "^MXX", name: "IPC (Mexico)", region: "Americas" }
+  fx:
+    - { t: "EURUSD=X", name: "EUR/USD" }
+    - { t: "GBPUSD=X", name: "GBP/USD" }
+    - { t: "JPY=X", name: "USD/JPY" }
+    - { t: "CNY=X", name: "USD/CNY" }
+    - { t: "CAD=X", name: "USD/CAD" }
+  commodities:
+    - { t: "BZ=F", name: "Brent crude" }
+    - { t: "NG=F", name: "Natural gas" }
+    - { t: "HG=F", name: "Copper" }
+    - { t: "SI=F", name: "Silver" }
   canada_enabled: false        # true adds the row below
   canada:
     - { t: "^GSPTSE", name: "S&P/TSX" }

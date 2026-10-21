@@ -457,6 +457,28 @@ input[type="search"]:focus, select:focus, input[type="date"]:focus { border-colo
 .mm-breadth .adv { background: var(--gain-fill); } .mm-breadth .dec { background: var(--loss-fill); }
 .mm-row-h { margin-top: .5rem !important; }
 .mm-foot { margin: .5rem 0 0; font: 500 .9rem var(--ui); color: var(--muted); }
+/* The Brief: an FT-style front page of the biggest finance stories */
+.brief-fp { margin: 0 0 1.5rem; padding: 1.1rem 1.25rem; background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--finance); }
+.brief-fp h2 { font: 700 1.9rem/1 var(--ui); margin: 0 0 .9rem; }
+.brief-fp h2 span, .mm-world h3 span, .mm-co h3 span { font: 500 1rem var(--ui); color: var(--muted); }
+.brief-fp ol { margin: 0; padding: 0; list-style: none; counter-reset: b; display: grid; gap: .9rem 1.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); }
+.brief-fp li { counter-increment: b; display: grid; grid-template-columns: 1.9rem 1fr; align-content: start; }
+.brief-fp li::before { content: counter(b); grid-row: span 3; font: 700 1.5rem/1.1 var(--ui); color: var(--finance); }
+.brief-fp li:first-child { grid-column: 1 / -1; }
+.brief-fp li:first-child h3 { font-size: 1.55rem; }
+.brief-fp h3 { margin: 0 0 .3rem; font: 600 1.15rem/1.3 var(--read); text-wrap: balance; }
+.brief-fp h3 a { text-decoration: none; } .brief-fp h3 a:hover { text-decoration: underline; }
+.brief-fp p { margin: 0 0 .3rem; max-width: 68ch; }
+.mm-world { margin: .5rem 0 1rem; }
+.mm-regions { display: grid; gap: 1rem 1.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); }
+.mm-regions h4 { margin: 0 0 .3rem; font: 700 1rem var(--ui); color: var(--muted); }
+.mm-regions table { width: 100%; border-collapse: collapse; font: 500 .95rem var(--ui); }
+.mm-regions th, .mm-regions td { padding: .25rem .3rem .25rem 0; border-bottom: 1px solid var(--line); text-align: left; font-weight: 500; }
+.mm-regions .n { text-align: right; }
+.mm-co ul { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: .45rem; }
+.mm-co li { display: flex; flex-wrap: wrap; gap: .3rem .6rem; align-items: baseline; font: 400 1rem/1.4 var(--read); }
+.co-tag { font: 700 .8rem var(--ui); padding: .05rem .4rem; border: 1px solid var(--finance); color: var(--ink); text-transform: none; }
+@media (max-width: 40rem) { .brief-fp { padding-inline: .9rem; } .brief-fp li:first-child h3 { font-size: 1.3rem; } }
 @media (max-width: 40rem) { .mm { padding-inline: .9rem; } .mm-movers .sec-c, .mm-movers thead th:last-child { display: none; } }
 
 /* ── Keyword tuning ──────────────────────────────────── */

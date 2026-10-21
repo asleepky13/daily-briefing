@@ -301,7 +301,7 @@
       "", "Data delayed ~15 min via Yahoo Finance. For information only, not investment advice."].filter((l, i, a) => l || a[i - 1]).join("\n");
   };
 
-  const renderMinute = (m) => {
+  const renderMinute = (m, deals = []) => {
     if (!m || !m.indices?.length) return "";
     const s = m.state, prominentFutures = ["premarket", "overnight", "closed"].includes(s.kind);
     const tile = (i) => `<li class="mm-tile">
@@ -348,14 +348,52 @@
       </div>
       ${m.macro.length ? `<h3 class="mm-row-h">Macro</h3><ul class="mm-macro">${m.macro.map(chip).join("")}</ul>` : ""}
       ${m.canada?.length ? `<h3 class="mm-row-h">Canada</h3><ul class="mm-macro">${m.canada.map(chip).join("")}</ul>` : ""}
+      ${m.world?.length ? `<section class="mm-world" aria-labelledby="mm-w-h"><h3 id="mm-w-h">World markets <span>latest close in each market</span></h3>
+        <div class="mm-regions">${[...new Set(m.world.map((w) => w.region))].map((region) => `<div><h4>${esc(region)}</h4>
+          <table><tbody>${m.world.filter((w) => w.region === region).map((w) => `<tr><th scope="row">${esc(w.name)}</th>
+            <td class="n">${num(w.price)}</td><td class="n">${move(w.pct)}</td><td class="n mm-asof">${esc(fmtShort(w.as_of).replace(/^\w+, /, ""))}</td></tr>`).join("")}</tbody></table></div>`).join("")}</div></section>` : ""}
+      ${m.fx?.length ? `<h3 class="mm-row-h">Currencies</h3><ul class="mm-macro">${m.fx.map((x) => `<li><span class="mm-cn">${esc(x.name)}</span> <span class="mm-cv">${num(x.price, 4)} ${move(x.pct)}</span></li>`).join("")}</ul>` : ""}
+      ${m.commodities?.length ? `<h3 class="mm-row-h">Commodities</h3><ul class="mm-macro">${m.commodities.map(chip).join("")}</ul>` : ""}
+      ${m.company_news?.length || deals.length ? `<section class="mm-co" aria-labelledby="mm-co-h"><h3 id="mm-co-h">Companies <span>what the biggest firms are doing, plus deals and earnings</span></h3>
+        <ul>${[...(m.company_news || []).map((c) => ({ tag: c.t, title: c.title, url: c.url, source: c.source })),
+               ...deals.map((s) => ({ tag: s.matched_keywords.find((k) => DEAL_WORDS.has(k)), title: s.title, url: s.url, source: s.source }))]
+          .filter((x, i, a) => a.findIndex((y) => y.url === x.url) === i).slice(0, 12)
+          .map((x) => `<li><span class="co-tag">${esc(x.tag)}</span><a href="${esc(safeUrl(x.url))}" rel="noopener" target="_blank">${esc(x.title)}</a> <span class="mm-asof">${esc(x.source)}</span></li>`).join("")}</ul></section>` : ""}
       <p class="mm-foot">Data delayed ~15 min via Yahoo Finance. For information only, not investment advice. Updated ${esc(etTime(m.generated_at))}.</p>
     </section>`;
   };
 
-  const mountMinute = async (el, date) => {
+  const DEAL_WORDS = new Set(["acquisition", "acquire", "acquires", "merger", "takeover", "buyout", "m&a", "ipo",
+    "initial public offering", "earnings", "revenue", "profit", "guidance", "quarterly results", "bankruptcy", "layoffs", "job cuts"]);
+  // Names in a headline (capitalised words, minus filler): two stories sharing 2+ names are one story told twice.
+  const NAME_SKIP = new Set(["The", "A", "An", "U.S.", "US", "UK", "Says", "Is", "As", "In", "On", "For", "And", "Of", "To", "With", "After", "Why", "How", "What"]);
+  const names = (title) => new Set((title.match(/\b[A-Z][\w&.'’-]+/g) || []).map((w) => w.replace(/['’]s$/, "")).filter((w) => !NAME_SKIP.has(w)));
+  const briefPicks = (sec) => {
+    const picked = [];
+    for (const s of sec.items) {
+      if (!s.summary) continue;
+      const n = names(s.title);
+      if (picked.some((p) => [...names(p.title)].filter((w) => n.has(w)).length >= 2)) continue;
+      picked.push(s);
+      if (picked.length === 8) break;
+    }
+    return picked;
+  };
+  const renderBrief = (sec) => { // the front page: the biggest stories, most-covered first, readable in a minute
+    const top = briefPicks(sec);
+    if (!top.length) return "";
+    return `<section class="brief-fp" aria-labelledby="brief-h"><h2 id="brief-h">The Brief <span>the biggest finance stories, most-covered first</span></h2>
+      <ol>${top.map((s) => `<li><h3><a href="${esc(safeUrl(s.url))}" rel="noopener" target="_blank">${esc(s.title)}</a></h3>
+        <p>${esc(s.summary)}</p>
+        <p class="meta"><span class="src">${esc(s.source)}</span>${s.also_covered_by?.length ? `<span>${s.also_covered_by.length + 1} outlets</span>` : ""}
+          <time datetime="${esc(s.published_at)}">${ago(s.published_at)}</time>${trendTag(s)}</p></li>`).join("")}</ol></section>`;
+  };
+  const dealsFrom = (sec, skip) => sec.items.filter((s) => !skip.has(s.url) && s.matched_keywords.some((k) => DEAL_WORDS.has(k))).slice(0, 6);
+
+  const mountMinute = async (el, date, deals = []) => {
     const m = await loadMinute(date);
     if (!m || !el.isConnected) return;
-    el.innerHTML = renderMinute(m);
+    el.innerHTML = renderMinute(m, deals);
     el.querySelector("#mm-copy")?.addEventListener("click", async () => {
       try { await navigator.clipboard.writeText(minuteText(m)); toast("Copied Market Minute"); }
       catch { toast("Copy blocked by the browser."); }
@@ -574,7 +612,7 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
         ${zh ? `<p class="sign" lang="zh-Hant" aria-hidden="true">${esc(zh)}</p>` : "<span></span>"}
         <div><h1 class="page">${esc(sec.name)}</h1>${whatMatters(sec)}</div>
       </div>
-      ${SECTION === "finance" ? `<div id="mm-mount"></div>` : ""}
+      ${SECTION === "finance" ? `${renderBrief(sec)}<div id="mm-mount"></div>` : ""}
       ${trendsPanel(SECTION, sec.name)}
       <div class="toolbar">
         <label class="grow">Search ${esc(sec.name)}<input type="search" id="q" autocomplete="off" value="${esc(state.q)}"></label>
@@ -628,7 +666,10 @@ ${visible.map((g) => `<h2>${esc(g.title)}</h2><ul>${g.stories.map((s) => `<li><a
       apply();
     });
     apply();
-    if (SECTION === "finance") mountMinute(document.getElementById("mm-mount"), DATE);
+    if (SECTION === "finance") {
+      const briefUrls = new Set(briefPicks(sec).map((s) => s.url));
+      mountMinute(document.getElementById("mm-mount"), DATE, dealsFrom(sec, briefUrls));
+    }
   };
 
   const renderArchive = (index) => {

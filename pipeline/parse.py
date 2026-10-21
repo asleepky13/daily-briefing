@@ -209,6 +209,7 @@ def parse_result(res, now: datetime) -> None:
             res.items = parse_feed(res.body, source=feed["name"], section=res.section, now=now)
         for it in res.items:
             it["from_dedicated_feed"] = feed.get("require_keyword_match", True) is False
+            it["weight"] = feed.get("weight", 0)
     except Exception as e:  # noqa: BLE001 - isolate per feed
         res.error = f"parse: {e}"[:200]
         res.items = []
