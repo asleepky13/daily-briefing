@@ -202,3 +202,41 @@ async def fetch_all(config: dict, use_cache: bool = True) -> list[FetchResult]:
         return await asyncio.gather(*(fetcher.fetch_feed(s, f) for s, f in expand_feeds(config)))
     finally:
         await fetcher.close()
+
+
+async def describe(items: list[dict], config: dict, limit: int = 80) -> int:
+    """Give snippet-less stories the publisher's own page description (og:description / meta description).
+
+    That's the teaser publishers write for link previews, not the article body, so paywalls are untouched.
+    robots.txt is respected and requests to one site stay 1 second apart. Returns how many were filled.
+    """
+    from selectolax.parser import HTMLParser
+    from pipeline.parse import clean_summary
+
+    todo = [it for it in items if len(it["summary"]) < 60 and "news.google.com" not in it["url"]][:limit]
+    if not todo:
+        return 0
+    fetcher = Fetcher(config.get("user_agent", "DailyBriefingBot/1.0"), use_cache=False)
+
+    async def one(it: dict) -> bool:
+        try:
+            if not await fetcher.allowed(it["url"]):
+                return False
+            r = await fetcher.get(it["url"])
+            if r.status_code != 200 or "html" not in r.headers.get("content-type", ""):
+                return False
+            tree = HTMLParser(r.text)
+            for sel in ('meta[property="og:description"]', 'meta[name="description"]', 'meta[name="twitter:description"]'):
+                node = tree.css_first(sel)
+                text = clean_summary(node.attributes.get("content") if node else "", it["title"])
+                if len(text) >= 40 and " | " not in text:  # "Daily News | Texas' Oldest Newspaper" is a site slogan
+                    it["summary"] = text
+                    return True
+        except Exception as e:  # noqa: BLE001 - a page that won't load just keeps its empty snippet
+            log.info("describe_skipped url=%s error=%s", it["url"][:80], type(e).__name__)
+        return False
+
+    try:
+        return sum(await asyncio.gather(*(one(it) for it in todo)))
+    finally:
+        await fetcher.close()

@@ -326,6 +326,7 @@
         <div><h2 id="mm-h">Market Minute</h2>
           <p class="mm-state"><strong>${esc(s.label)}</strong>${s.kind === "open" ? "" : ` <span>Session of ${esc(fmtShort(s.session))}</span>`}</p>
           ${m.status === "stale" ? `<p class="mm-alert">${esc(m.stale_note)}</p>` : ""}
+          ${m.partial_note ? `<p class="mm-alert">${esc(m.partial_note)}</p>` : ""}
           ${s.note && s.kind !== "after_close" ? `<p class="mm-note">${esc(s.note)}</p>` : ""}</div>
         <button type="button" class="btn" id="mm-copy">Copy Market Minute</button>
       </div>

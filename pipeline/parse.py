@@ -35,6 +35,49 @@ def clean_text(raw: str | None, limit: int = SNIPPET_MAX) -> str:
     return text
 
 
+# Feed boilerplate that carries no news: footers, read-more links, datelines, Hacker News metadata.
+_JUNK = [re.compile(p, re.I) for p in (
+    r"The post .{0,200}? appeared first on .*$", r"\b(Continue reading|Read more|Read the full (story|article))\b.*$",
+    r"\[(…|\.\.\.|&#8230;)\]", r"^Article URL:.*$", r"Comments URL:.*$", r"Points: \d+.*$",
+    r"^(\(?Reuters\)?|\(AP\)|\(CP\)|\(Bloomberg\))\s*[-–—:]\s*", r"^[A-Z][A-Z .,'-]{2,40}\s*\((AP|Reuters|CP|AFP)\)\s*[-–—]\s*",
+    r"^(Photo|Image|Video)( credit)?:[^.]*\.\s*", r"https?://\S+",
+    r"^Filed: \S+ AccNo: \S+ Size: \S+ \w+\s*",  # SEC EDGAR metadata; the filing items that follow are the news
+)]
+_SENT_END = re.compile(r"[.!?][\"'’”)]?(?=\s)")
+
+
+def _first_paragraph(raw: str) -> str:
+    """Feeds often glue a standfirst to the article's first line; the first substantial paragraph is the summary."""
+    tree = HTMLParser(raw)
+    blocks = [n.text(separator=" ").strip() for n in tree.css("p, li, div:not(:has(p, div))")]
+    for b in blocks:
+        if len(_WS.sub(" ", b)) >= 60:
+            return b
+    return tree.text(separator=" ")
+
+
+def clean_summary(raw: str | None, title: str = "", limit: int = SNIPPET_MAX) -> str:
+    """A readable snippet: first paragraph, boilerplate removed, no repeat of the headline, cut at a sentence end."""
+    if not raw:
+        return ""
+    text = _first_paragraph(raw) if "<" in raw else raw
+    text = _WS.sub(" ", html.unescape(text)).strip()
+    for pat in _JUNK:
+        text = pat.sub("", text).strip()
+    head = _WS.sub(" ", html.unescape(title)).strip()
+    # Google News and some wires repeat the headline (often + the outlet name) as the "summary": that's no summary
+    if head and (text.lower().startswith(head.lower()) or head.lower().startswith(text.lower()[: max(20, len(text) - 30)])):
+        text = text[len(head):].strip(" -–—|:")
+        if len(text) < 40:
+            return ""
+    if len(text) < 12:  # leftovers like an outlet name; real one-line snippets survive
+        return ""
+    if len(text) > limit:
+        cut = [m.end() for m in _SENT_END.finditer(text) if m.end() <= limit]
+        text = text[:cut[-1]] if cut and cut[-1] >= 140 else text[: limit - 1].rsplit(" ", 1)[0].rstrip(",;:.-") + "…"
+    return text
+
+
 def resolve_gnews(url: str) -> str:
     """Decode a Google News article link to the publisher URL when the URL is embedded in the token.
 
@@ -92,7 +135,7 @@ def make_item(*, title: str, url: str, source: str, section: str, published: dat
         "feed_section": section,
         "published_at": (pub or now).isoformat(timespec="seconds"),
         "date_estimated": pub is None,
-        "summary": clean_text(summary),
+        "summary": clean_summary(summary, title),
         "matched_keywords": [],
         "topic_tags": [],
         "ai_summary": None,
@@ -123,8 +166,6 @@ def parse_feed(body: bytes, *, source: str, section: str, now: datetime) -> list
                 src = publisher
                 title = re.sub(rf"\s+-\s+{re.escape(publisher)}\s*$", "", title)
         summary = e.get("summary") or e.get("description") or ""
-        if clean_text(summary) == clean_text(title):  # Google News repeats the title as summary
-            summary = ""
         items.append(make_item(title=title, url=link, source=src, section=section,
                                published=published, summary=summary, now=now))
     return items

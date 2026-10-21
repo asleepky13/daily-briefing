@@ -166,6 +166,8 @@ def cluster(items: list[dict], threshold: float = 85) -> list[dict]:
                     seen.add(cand["source"])
                     lead["also_covered_by"].append(cand)
             lead["topic_tags"] = sorted(set(lead["topic_tags"]) | set(m["topic_tags"]))
+        if len(lead["summary"]) < 60:  # same story, another outlet wrote a usable snippet: borrow the longest
+            lead["summary"] = max((m["summary"] for m in group), key=len)
         lead["cluster_size"] = len(group)
         out.append(lead)
     return out

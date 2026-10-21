@@ -21,7 +21,7 @@ from dotenv import load_dotenv
 
 from pipeline import build, integrations, market_minute
 from pipeline.dedupe import cluster, link_previous, merge_exact
-from pipeline.fetch import FetchResult, fetch_all
+from pipeline.fetch import FetchResult, describe, fetch_all
 from pipeline.filter import apply_source_rules, assign_sections, compile_sections, keyword_report, recent
 from pipeline.parse import parse_result
 from pipeline.summarize import build_sections
@@ -90,11 +90,12 @@ def run(config: dict, *, dry_run: bool, use_cache: bool = True) -> int:
     stories = cluster(unique, config.get("similarity_threshold", 85))
     link_previous(stories, build.previous_stories(today), config.get("similarity_threshold", 85))
     sections = build_sections(stories, config, compiled, now)
+    described = asyncio.run(describe([s for sec in sections.values() for s in sec["items"]], config))
     kept = sum(s["count"] for s in sections.values())
 
     ok = sum(r.ok for r in results)
     stats = {"feeds_ok": ok, "feeds_total": len(results), "scanned": len(fetched), "recent": len(fresh),
-             "matched": len(matched), "deduped": len(matched) - len(stories), "kept": kept, "ai_calls": 0}
+             "matched": len(matched), "deduped": len(matched) - len(stories), "kept": kept, "described": described, "ai_calls": 0}
     summary = " ".join(f"{k}={v}" for k, v in stats.items())
     log.info("run_summary %s", summary)
     _gh_summary(f"### Daily Briefing run\n\n`{summary}`\n\n```\n{health_table(results)}\n```")

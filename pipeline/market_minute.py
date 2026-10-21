@@ -11,6 +11,7 @@ import hashlib
 import json
 import logging
 import re
+import time
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -391,7 +392,8 @@ def _spark(pts: list[tuple[str, float]], n: int = 60) -> list[float]:
     return [round(v, 2) for v in out]
 
 
-def build(config: dict, now: datetime, headlines: list[dict], fetch=fetch_yahoo, previous: dict | None = None) -> dict | None:
+def build(config: dict, now: datetime, headlines: list[dict], fetch=fetch_yahoo, previous: dict | None = None,
+          retry_pause: float = 3.0) -> dict | None:
     """Fetch, validate and assemble the Market Minute. On failure returns the previous snapshot marked stale (or None)."""
     m = config.get("markets") or {}
     if not m.get("enabled", True):
@@ -407,12 +409,21 @@ def build(config: dict, now: datetime, headlines: list[dict], fetch=fetch_yahoo,
     history = load_json(DIR / "history.json", {})
     tracked = [s["t"] for s in groups["index"] + groups["sector"]]
 
+    period = "1y" if len(history) < len(tracked) else "10d"
     try:
-        daily = fetch(all_syms, "1y" if len(history) < len(tracked) else "10d", "1d")
+        daily = fetch(all_syms, period, "1d")
     except Exception as e:  # noqa: BLE001 - network or Yahoo change: fall through to Stooq / last good
         log.warning("yahoo_failed error=%r", f"{type(e).__name__}: {e}"[:160])
         daily = {}
     missing = [t for t in all_syms if t not in daily]
+    if missing and daily:  # a partial answer (Yahoo rate-limiting mid-batch): ask once more for just those
+        log.warning("yahoo_partial missing=%d of %d; retrying", len(missing), len(all_syms))
+        time.sleep(retry_pause)
+        try:
+            daily.update(fetch(missing, period, "1d"))
+        except Exception as e:  # noqa: BLE001
+            log.warning("yahoo_retry_failed error=%r", str(e)[:120])
+        missing = [t for t in all_syms if t not in daily]
     if missing:
         daily.update(fetch_stooq(missing, history, config.get("user_agent", "DailyBriefingBot/1.0")))
     intraday = {}
@@ -483,9 +494,39 @@ def build(config: dict, now: datetime, headlines: list[dict], fetch=fetch_yahoo,
     snap["breadth"] = breadth(megas)
     snap["universe_size"] = len(by_t)
     snap["min_cap"] = float(m.get("megacap_min_cap", 200e9))
+    carry_over(snap, previous)
     snap["take"] = write_take(snap, session)
     snap["_history"] = history  # stripped by save()
     return snap
+
+
+CARRY = ("futures", "sectors", "macro", "mag7")
+
+
+def carry_over(snap: dict, previous: dict | None) -> None:
+    """Groups this run couldn't fetch are filled from the last good snapshot of the same session, and labelled.
+
+    Never across sessions: yesterday's sectors would be wrong today, so those stay empty instead.
+    """
+    if not previous or previous.get("state", {}).get("session") != snap["state"]["session"]:
+        return
+    carried = [k for k in CARRY if not snap.get(k) and previous.get(k)]
+    for k in carried:
+        snap[k] = previous[k]
+    pm = previous.get("movers") or {}
+    if not (snap["movers"]["gainers"] or snap["movers"]["losers"]) and (pm.get("gainers") or pm.get("losers")):
+        snap["movers"], snap["breadth"], snap["universe_size"] = pm, previous.get("breadth"), previous.get("universe_size")
+        carried.append("movers")
+    if carried:
+        when = datetime.fromisoformat(previous["generated_at"]).astimezone(ET)
+        names = {"futures": "futures", "sectors": "sectors", "macro": "macro", "mag7": "Magnificent 7", "movers": "mega-cap movers"}
+        snap["partial_note"] = f"{', '.join(names[k] for k in carried).capitalize()} as of {fmt_clock(when)} ET: this refresh only partly loaded"
+        log.warning("markets_partial carried=%s", ",".join(carried))
+
+
+def completeness(snap: dict) -> int:
+    mv = snap.get("movers") or {}
+    return len(snap.get("sectors") or []) + len(mv.get("gainers") or []) + len(mv.get("losers") or []) + len(snap.get("mag7") or [])
 
 
 def header_board(snap: dict | None) -> list[dict]:
@@ -510,8 +551,11 @@ def save(snap: dict | None, today: date) -> None:
     (DIR / "latest.json").write_text(body, "utf-8")
     recap = DIR / f"{snap['state']['session']}.json"
     # the after-close run is the edition of record; any later run fills the gap if that one was missed
-    if snap.get("status") == "ok" and snap["state"]["kind"] != "open" and (snap["state"]["kind"] == "after_close" or not recap.exists()):
-        recap.write_text(body, "utf-8")
+    if snap.get("status") == "ok" and snap["state"]["kind"] != "open":
+        old = load_json(recap, None)
+        better = old is None or (snap["state"]["kind"] == "after_close" and completeness(snap) >= completeness(old))
+        if better:  # a partial later run never overwrites a complete recap
+            recap.write_text(body, "utf-8")
     cutoff = (today - timedelta(days=RETENTION_DAYS)).isoformat()
     for f in DIR.glob("20??-??-??.json"):
         if f.stem < cutoff:

@@ -222,3 +222,48 @@ def test_build_with_good_data(isolated):
     assert s["take"][0].startswith(("The S&P 500 closed", "Stocks were up", "It was a green session"))
     mm.save(s, datetime(2026, 10, 19).date())
     assert (mm.DIR / "latest.json").exists() and (mm.DIR / "2026-10-19.json").exists() and (mm.DIR / "history.json").exists()
+
+
+# ── partial answers from Yahoo ──────────────────────────
+CFG2 = {"markets": {"enabled": True, "indices": [{"t": "^GSPC", "name": "S&P 500"}, {"t": "^IXIC", "name": "Nasdaq"}],
+                    "futures": [], "sectors": [{"t": "XLK", "name": "Tech"}, {"t": "XLE", "name": "Energy"}], "macro": [],
+                    "megacaps": [{"t": "AAA", "name": "Alpha", "sector": "Tech", "shares": 1e9}], "magnificent7": []}}
+GOOD = {"^GSPC": [("2026-10-19", 7000.0), ("2026-10-20", 7056.0)], "^IXIC": [("2026-10-19", 24000.0), ("2026-10-20", 23900.0)],
+        "XLK": [("2026-10-19", 100.0), ("2026-10-20", 101.0)], "XLE": [("2026-10-19", 90.0), ("2026-10-20", 89.0)],
+        "AAA": [("2026-10-19", 300.0), ("2026-10-20", 309.0)]}
+
+
+def test_retry_fills_a_partial_batch(isolated):
+    calls = []
+    def flaky(tickers, period, interval):
+        calls.append(list(tickers))
+        if len(calls) == 1:
+            return {t: GOOD[t] for t in ("^GSPC", "^IXIC")}  # rate-limited after the indexes
+        return {t: GOOD[t] for t in tickers if t in GOOD}
+    s = mm.build(CFG2, at(2026, 10, 20, 18), [], fetch=flaky, retry_pause=0)
+    assert len(calls) == 2 and set(calls[1]) == {"XLK", "XLE", "AAA"}
+    assert [x["name"] for x in s["sectors"]] == ["Tech", "Energy"] and s["movers"]["gainers"][0]["t"] == "AAA"
+    assert "partial_note" not in s
+
+
+def test_carry_over_same_session_only(isolated):
+    only_idx = lambda tickers, period, interval: {t: GOOD[t] for t in tickers if t.startswith("^")}
+    good = mm.build(CFG2, at(2026, 10, 20, 18), [], fetch=lambda t, p, i: {k: GOOD[k] for k in t if k in GOOD}, retry_pause=0)
+    good["generated_at"] = "2026-10-20T22:20+00:00"
+    s = mm.build(CFG2, at(2026, 10, 20, 20), [], fetch=only_idx, previous=good, retry_pause=0)
+    assert s["sectors"] == good["sectors"] and s["movers"] == good["movers"]
+    assert s["partial_note"] == "Sectors, mega-cap movers as of 6:20 PM ET: this refresh only partly loaded"
+    assert "Tech" in " ".join(s["take"])                       # the take still covers sectors
+    good["state"]["session"] = "2026-10-19"                    # a different session: nothing carried
+    s2 = mm.build(CFG2, at(2026, 10, 20, 20), [], fetch=only_idx, previous=good, retry_pause=0)
+    assert s2["sectors"] == [] and "partial_note" not in s2
+
+
+def test_partial_run_never_overwrites_a_complete_recap(isolated):
+    full = mm.build(CFG2, at(2026, 10, 20, 18), [], fetch=lambda t, p, i: {k: GOOD[k] for k in t if k in GOOD}, retry_pause=0)
+    mm.save(full, datetime(2026, 10, 20).date())
+    thin = mm.build(CFG2, at(2026, 10, 20, 20), [], fetch=lambda t, p, i: {k: GOOD[k] for k in t if k.startswith("^")}, retry_pause=0)
+    mm.save(thin, datetime(2026, 10, 20).date())
+    import json
+    saved = json.loads((mm.DIR / "2026-10-20.json").read_text("utf-8"))
+    assert len(saved["sectors"]) == 2 and saved["movers"]["gainers"]

@@ -243,3 +243,16 @@ def test_keyword_report():
     assert rep["sole"] == [("launch", 1)]
     assert rep["excluded"][0]["term"] == "deal" and rep["excluded"][0]["count"] == 1
     assert rep["unused"] == [r"re:raised \$\d+"]
+
+
+def test_clean_summary_strips_boilerplate_and_headline_echo():
+    from pipeline.parse import clean_summary as c
+    assert c("Article URL: https://x.com/a Comments URL: https://news.ycombinator.com/item?id=1 Points: 3 # Comments: 1", "Thing") == ""
+    assert c("Senate passes the budget bill Reuters", "Senate passes the budget bill") == ""
+    assert c("<p>Two leaders spent a week in jail after defying protest restrictions in Delhi</p><p>An Indian court ordered</p>", "x") ==         "Two leaders spent a week in jail after defying protest restrictions in Delhi"
+    assert c("WASHINGTON (AP) — The Senate voted 52-48 to advance a bill.", "x") == "The Senate voted 52-48 to advance a bill."
+    assert c("<p>New phone launched today with many features and capabilities.</p><p>The post Foo appeared first on Site.</p>", "Foo") ==         "New phone launched today with many features and capabilities."
+    assert c("Filed: 2026-10-21 AccNo: 0001213900-26-111421 Size: 304 KB Item 1.01: Entry into a Material Definitive Agreement", "8-K") ==         "Item 1.01: Entry into a Material Definitive Agreement"
+    long = "First sentence is here and it is reasonably long to count. " * 3 + "Second part keeps going without an end " * 10
+    out = c(long, "x")
+    assert len(out) <= 300 and out.endswith(".")  # cut at a sentence end, not mid-word

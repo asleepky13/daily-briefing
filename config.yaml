@@ -61,11 +61,21 @@ sections:
       - { name: "MarketWatch", type: rss, url: "https://feeds.content.dowjones.io/public/rss/mw_topstories" }
       - { name: "Yahoo Finance", type: rss, url: "https://feeds.finance.yahoo.com/rss/2.0/headline?s=%5EGSPC,%5EGSPTSE&region=US&lang=en-US" }
       - { name: "Financial Post", type: rss, url: "https://financialpost.com/feed" }
-      - { name: "GlobeNewswire", type: rss, url: "https://www.globenewswire.com/RssFeed/orgclass/1/feedTitle/GlobeNewswire%20-%20News%20about%20Public%20Companies" }
       - { name: "PR Newswire", type: rss, url: "https://www.prnewswire.com/rss/financial-services-latest-news/financial-services-latest-news-list.rss" }
       - { name: "SEC 8-K filings", type: atom, url: "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=8-K&company=&dateb=&owner=include&start=0&count=40&output=atom", require_keyword_match: false }
       - { name: "Reuters (via Google News)", type: rss, query: "site:reuters.com business OR markets when:1d" }
       - { name: "Bloomberg (via Google News)", type: rss, query: "site:bloomberg.com markets when:1d" }
+      - { name: "WSJ Markets", type: rss, url: "https://feeds.content.dowjones.io/public/rss/RSSMarketsMain", require_keyword_match: false }
+      - { name: "Financial Times Markets", type: rss, url: "https://www.ft.com/markets?format=rss", require_keyword_match: false }
+      - { name: "CNBC Markets", type: rss, url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258", require_keyword_match: false }
+      - { name: "The Globe and Mail Business", type: rss, url: "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/business/" }
+      - { name: "BNN Bloomberg", type: rss, url: "https://www.bnnbloomberg.ca/arc/outboundfeeds/rss/" }
+      - { name: "NYT Business", type: rss, url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml" }
+      - { name: "The Guardian Business", type: rss, url: "https://www.theguardian.com/business/rss" }
+      - { name: "Fortune", type: rss, url: "https://fortune.com/feed/" }
+      - { name: "Seeking Alpha", type: rss, url: "https://seekingalpha.com/market_currents.xml" }
+      - { name: "Investing.com", type: rss, url: "https://www.investing.com/rss/news_25.rss" }
+      - { name: "Federal Reserve", type: rss, url: "https://www.federalreserve.gov/feeds/press_all.xml", require_keyword_match: false }
 
   tech:
     name: "Tech"
@@ -91,6 +101,17 @@ sections:
       - { name: "Wired", type: rss, url: "https://www.wired.com/feed/rss" }
       - { name: "Krebs on Security", type: rss, url: "https://krebsonsecurity.com/feed/", require_keyword_match: false }
       - { name: "Reuters Tech (via Google News)", type: rss, query: "site:reuters.com technology when:1d" }
+      - { name: "Engadget", type: rss, url: "https://www.engadget.com/rss.xml" }
+      - { name: "MIT Technology Review", type: rss, url: "https://www.technologyreview.com/feed/", require_keyword_match: false }
+      - { name: "BleepingComputer", type: rss, url: "https://www.bleepingcomputer.com/feed/", require_keyword_match: false }
+      - { name: "The Hacker News (security)", type: rss, url: "https://feeds.feedburner.com/TheHackersNews", require_keyword_match: false }
+      - { name: "NYT Technology", type: rss, url: "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml", require_keyword_match: false }
+      - { name: "The Guardian Technology", type: rss, url: "https://www.theguardian.com/technology/rss" }
+      - { name: "ZDNet", type: rss, url: "https://www.zdnet.com/news/rss.xml" }
+      - { name: "GeekWire", type: rss, url: "https://www.geekwire.com/feed/" }
+      - { name: "BetaKit (Canadian tech)", type: rss, url: "https://betakit.com/feed/" }
+      - { name: "9to5Mac", type: rss, url: "https://9to5mac.com/feed/" }
+      - { name: "404 Media", type: rss, url: "https://www.404media.co/rss/", require_keyword_match: false }
 
   global:
     name: "Global Politics"
@@ -111,10 +132,18 @@ sections:
       - { name: "The Guardian World", type: rss, url: "https://www.theguardian.com/world/rss" }
       - { name: "Al Jazeera", type: rss, url: "https://www.aljazeera.com/xml/rss/all.xml" }
       - { name: "NPR World", type: rss, url: "https://feeds.npr.org/1004/rss.xml", require_keyword_match: false }
-      - { name: "Politico", type: rss, url: "https://rss.politico.com/politics.xml" }
       - { name: "DW World", type: rss, url: "https://rss.dw.com/rdf/rss-en-world" }
       - { name: "AP (via Google News)", type: rss, query: "site:apnews.com world OR politics when:1d" }
       - { name: "Reuters World (via Google News)", type: rss, query: "site:reuters.com world when:1d" }
+      - { name: "NYT World", type: rss, url: "https://rss.nytimes.com/services/xml/rss/nyt/World.xml", require_keyword_match: false }
+      - { name: "Foreign Policy", type: rss, url: "https://foreignpolicy.com/feed/", require_keyword_match: false }
+      - { name: "France 24", type: rss, url: "https://www.france24.com/en/rss" }
+      - { name: "Sky News World", type: rss, url: "https://feeds.skynews.com/feeds/rss/world.xml" }
+      - { name: "UN News", type: rss, url: "https://news.un.org/feed/subscribe/en/news/all/rss.xml" }
+      - { name: "Politico Europe", type: rss, url: "https://www.politico.eu/feed/" }
+      - { name: "Euronews", type: rss, url: "https://www.euronews.com/rss" }
+      - { name: "South China Morning Post", type: rss, url: "https://www.scmp.com/rss/91/feed" }
+      - { name: "The Diplomat", type: rss, url: "https://thediplomat.com/feed/" }
 
   local:
     name: "Local Politics"
@@ -137,16 +166,19 @@ sections:
       - { name: "{city} city council (via Google News)", type: rss, query: '"{city}" (council OR mayor OR "city hall") when:1d' }
       - { name: "{province} legislature (via Google News)", type: rss, query: '"{province}" (premier OR legislature OR "Queen''s Park") when:1d' }
       - { name: "{country} Parliament (via Google News)", type: rss, query: '"{country}" (Parliament OR "House of Commons" OR "prime minister") when:1d' }
-      # HTML scraper example: CP24 has no working RSS, so headlines are read from the page.
-      - name: "CP24"
-        type: html
-        url: "https://www.cp24.com/local/toronto/"
-        selectors:
-          container: "article"
-          title: "h2.c-heading"
-          link: "h2.c-heading a"
-          date: "time"
-          summary: "p"
+      - { name: "CP24", type: rss, url: "https://www.cp24.com/arc/outboundfeeds/rss/?outputType=xml" }
+      - { name: "CityNews Toronto", type: rss, url: "https://toronto.citynews.ca/feed/" }
+      - { name: "Toronto Star GTA", type: rss, url: "https://www.thestar.com/search/?f=rss&t=article&c=news/gta*&l=50&s=start_time&sd=desc" }
+      - { name: "The Globe and Mail Toronto", type: rss, url: "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/canada/toronto/" }
+      - { name: "The Globe and Mail Politics", type: rss, url: "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/politics/", require_keyword_match: false }
+      - { name: "Global News Politics", type: rss, url: "https://globalnews.ca/politics/feed/", require_keyword_match: false }
+      - { name: "National Post", type: rss, url: "https://nationalpost.com/feed/" }
+      # A site with no feed can be read from its page with CSS selectors, e.g.:
+      # - name: "Some site"
+      #   type: html
+      #   url: "https://example.com/news/"
+      #   selectors: { container: "article", title: "h2", link: "h2 a", date: "time", summary: "p" }
+
 # Publisher names. `rename` tidies how a source is shown (left: name as it arrives, right: what you see).
 # Website-style names you don't list (e.g. "toronto.citynews.ca") are shortened automatically ("Citynews").
 # `block` drops a publisher everywhere. Names are matched without regard to capitals.
@@ -157,11 +189,25 @@ sources:
     "AP News": "AP"
     "CNBC Top News": "CNBC"
     "CNBC Finance": "CNBC"
+    "CNBC Markets": "CNBC"
     "BBC World": "BBC"
     "The Guardian World": "The Guardian"
+    "The Guardian Business": "The Guardian"
+    "The Guardian Technology": "The Guardian"
+    "NYT Business": "The New York Times"
+    "NYT Technology": "The New York Times"
+    "NYT World": "The New York Times"
+    "The Globe and Mail Business": "The Globe and Mail"
+    "The Globe and Mail Toronto": "The Globe and Mail"
+    "The Globe and Mail Politics": "The Globe and Mail"
+    "WSJ Markets": "The Wall Street Journal"
+    "Financial Times Markets": "Financial Times"
+    "Sky News World": "Sky News"
     "DW World": "DW"
     "NPR World": "NPR"
     "Global News Toronto": "Global News"
+    "Global News Politics": "Global News"
+    "Toronto Star GTA": "Toronto Star"
     "CBC Toronto": "CBC"
     "CBC Politics": "CBC"
     "SEC 8-K filings": "SEC EDGAR"
