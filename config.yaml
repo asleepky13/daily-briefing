@@ -74,6 +74,13 @@ sections:
       - { name: "Bloomberg (via Google News)", type: rss, query: "site:bloomberg.com markets when:1d", weight: 3 }
       - { name: "WSJ Markets", type: rss, url: "https://feeds.content.dowjones.io/public/rss/RSSMarketsMain", require_keyword_match: false, weight: 3 }
       - { name: "Financial Times Markets", type: rss, url: "https://www.ft.com/markets?format=rss", require_keyword_match: false, weight: 3 }
+      - { name: "Financial Times", type: rss, url: "https://www.ft.com/rss/home", weight: 3 }
+      - { name: "Financial Times Companies", type: rss, url: "https://www.ft.com/companies?format=rss", weight: 3 }
+      - { name: "Financial Times Global Economy", type: rss, url: "https://www.ft.com/global-economy?format=rss", require_keyword_match: false, weight: 3 }
+      - { name: "Financial Times Lex", type: rss, url: "https://www.ft.com/lex?format=rss", weight: 2 }
+      - { name: "The Economist Business", type: rss, url: "https://www.economist.com/business/rss.xml", weight: 2 }
+      - { name: "The Economist Finance & Economics", type: rss, url: "https://www.economist.com/finance-and-economics/rss.xml", require_keyword_match: false, weight: 2 }
+      - { name: "Nikkei Asia (via Google News)", type: rss, query: "site:asia.nikkei.com business OR markets OR economy when:1d", weight: 2 }
       - { name: "CNBC Markets", type: rss, url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258", require_keyword_match: false, weight: 2 }
       - { name: "The Globe and Mail Business", type: rss, url: "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/business/", weight: 2 }
       - { name: "BNN Bloomberg", type: rss, url: "https://www.bnnbloomberg.ca/arc/outboundfeeds/rss/", weight: 2 }
@@ -109,6 +116,7 @@ sections:
       - { name: "Krebs on Security", type: rss, url: "https://krebsonsecurity.com/feed/", require_keyword_match: false }
       - { name: "Reuters Tech (via Google News)", type: rss, query: "site:reuters.com technology when:1d" }
       - { name: "Engadget", type: rss, url: "https://www.engadget.com/rss.xml" }
+      - { name: "Financial Times Technology", type: rss, url: "https://www.ft.com/technology?format=rss" }
       - { name: "MIT Technology Review", type: rss, url: "https://www.technologyreview.com/feed/", require_keyword_match: false }
       - { name: "BleepingComputer", type: rss, url: "https://www.bleepingcomputer.com/feed/", require_keyword_match: false }
       - { name: "The Hacker News (security)", type: rss, url: "https://feeds.feedburner.com/TheHackersNews", require_keyword_match: false }
@@ -143,6 +151,8 @@ sections:
       - { name: "AP (via Google News)", type: rss, query: "site:apnews.com world OR politics when:1d" }
       - { name: "Reuters World (via Google News)", type: rss, query: "site:reuters.com world when:1d" }
       - { name: "NYT World", type: rss, url: "https://rss.nytimes.com/services/xml/rss/nyt/World.xml", require_keyword_match: false }
+      - { name: "Financial Times World", type: rss, url: "https://www.ft.com/world?format=rss", require_keyword_match: false }
+      - { name: "The Economist International", type: rss, url: "https://www.economist.com/international/rss.xml" }
       - { name: "Foreign Policy", type: rss, url: "https://foreignpolicy.com/feed/", require_keyword_match: false }
       - { name: "France 24", type: rss, url: "https://www.france24.com/en/rss" }
       - { name: "Sky News World", type: rss, url: "https://feeds.skynews.com/feeds/rss/world.xml" }
@@ -209,6 +219,14 @@ sources:
     "The Globe and Mail Politics": "The Globe and Mail"
     "WSJ Markets": "The Wall Street Journal"
     "Financial Times Markets": "Financial Times"
+    "Financial Times Companies": "Financial Times"
+    "Financial Times Global Economy": "Financial Times"
+    "Financial Times Lex": "Financial Times (Lex)"
+    "Financial Times Technology": "Financial Times"
+    "Financial Times World": "Financial Times"
+    "The Economist Business": "The Economist"
+    "The Economist Finance & Economics": "The Economist"
+    "The Economist International": "The Economist"
     "Sky News World": "Sky News"
     "DW World": "DW"
     "NPR World": "NPR"
