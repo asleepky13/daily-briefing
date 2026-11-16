@@ -318,64 +318,64 @@ markets:
     GOOG: ["Google"]
     META: ["Facebook"]
   # --- mega-caps: rebuilt monthly by scripts/refresh_megacaps.py; edit freely, the next refresh rewrites this block ---
-  megacaps_refreshed: "2026-10-19"
+  megacaps_refreshed: "2026-11-16"
   megacaps:
+    - { t: AAPL, name: "Apple", sector: "Information Technology", shares: 1.453e+10 }
     - { t: NVDA, name: "Nvidia", sector: "Information Technology", shares: 2.415e+10 }
-    - { t: AAPL, name: "Apple", sector: "Information Technology", shares: 1.459e+10 }
-    - { t: GOOGL, name: "Alphabet", sector: "Communication Services", shares: 1.223e+10 }
-    - { t: GOOG, name: "Alphabet", sector: "Communication Services", shares: 1.223e+10 }
     - { t: MSFT, name: "Microsoft", sector: "Information Technology", shares: 7.426e+09 }
-    - { t: AMZN, name: "Amazon", sector: "Consumer Discretionary", shares: 1.079e+10 }
-    - { t: META, name: "Meta Platforms", sector: "Communication Services", shares: 2.548e+09 }
+    - { t: GOOGL, name: "Alphabet", sector: "Communication Services", shares: 1.229e+10 }
+    - { t: GOOG, name: "Alphabet", sector: "Communication Services", shares: 1.229e+10 }
+    - { t: AMZN, name: "Amazon", sector: "Consumer Discretionary", shares: 1.081e+10 }
     - { t: AVGO, name: "Broadcom", sector: "Information Technology", shares: 4.774e+09 }
-    - { t: TSLA, name: "Tesla", sector: "Consumer Discretionary", shares: 3.95e+09 }
-    - { t: BRK-B, name: "Berkshire Hathaway", sector: "Financials", shares: 2.141e+09 }
-    - { t: LLY, name: "Eli Lilly", sector: "Health Care", shares: 8.917e+08 }
-    - { t: MU, name: "Micron Technology", sector: "Information Technology", shares: 1.131e+09 }
+    - { t: META, name: "Meta Platforms", sector: "Communication Services", shares: 2.556e+09 }
+    - { t: TSLA, name: "Tesla", sector: "Consumer Discretionary", shares: 3.953e+09 }
+    - { t: LLY, name: "Eli Lilly", sector: "Health Care", shares: 8.907e+08 }
+    - { t: BRK-B, name: "Berkshire Hathaway", sector: "Financials", shares: 2.125e+09 }
     - { t: WMT, name: "Walmart", sector: "Consumer Staples", shares: 7.934e+09 }
     - { t: JPM, name: "JPMorgan Chase", sector: "Financials", shares: 2.656e+09 }
-    - { t: AMD, name: "Advanced Micro Devices", sector: "Information Technology", shares: 1.632e+09 }
-    - { t: V, name: "Visa", sector: "Financials", shares: 1.877e+09 }
-    - { t: XOM, name: "ExxonMobil", sector: "Energy", shares: 4.112e+09 }
-    - { t: JNJ, name: "Johnson & Johnson", sector: "Health Care", shares: 2.41e+09 }
-    - { t: MA, name: "Mastercard", sector: "Financials", shares: 8.76e+08 }
-    - { t: ABBV, name: "AbbVie", sector: "Health Care", shares: 1.767e+09 }
-    - { t: INTC, name: "Intel", sector: "Information Technology", shares: 5.286e+09 }
-    - { t: PLTR, name: "Palantir Technologies", sector: "Information Technology", shares: 2.403e+09 }
+    - { t: MU, name: "Micron Technology", sector: "Information Technology", shares: 1.131e+09 }
+    - { t: AMD, name: "Advanced Micro Devices", sector: "Information Technology", shares: 1.64e+09 }
+    - { t: V, name: "Visa", sector: "Financials", shares: 1.866e+09 }
+    - { t: XOM, name: "ExxonMobil", sector: "Energy", shares: 4.079e+09 }
+    - { t: JNJ, name: "Johnson & Johnson", sector: "Health Care", shares: 2.407e+09 }
+    - { t: MA, name: "Mastercard", sector: "Financials", shares: 8.712e+08 }
+    - { t: ABBV, name: "AbbVie", sector: "Health Care", shares: 1.768e+09 }
     - { t: COST, name: "Costco", sector: "Consumer Staples", shares: 4.431e+08 }
-    - { t: CVX, name: "Chevron", sector: "Energy", shares: 1.962e+09 }
-    - { t: CSCO, name: "Cisco", sector: "Information Technology", shares: 3.943e+09 }
-    - { t: KO, name: "Coca-Cola", sector: "Consumer Staples", shares: 4.303e+09 }
-    - { t: ORCL, name: "Oracle", sector: "Information Technology", shares: 3.032e+09 }
-    - { t: PG, name: "Procter & Gamble", sector: "Consumer Staples", shares: 2.324e+09 }
-    - { t: UNH, name: "UnitedHealth", sector: "Health Care", shares: 8.976e+08 }
-    - { t: MRK, name: "Merck", sector: "Health Care", shares: 2.467e+09 }
-    - { t: BAC, name: "Bank of America", sector: "Financials", shares: 6.993e+09 }
-    - { t: LRCX, name: "Lam Research", sector: "Information Technology", shares: 1.251e+09 }
-    - { t: CAT, name: "Caterpillar", sector: "Industrials", shares: 4.597e+08 }
-    - { t: AMAT, name: "Applied Materials", sector: "Information Technology", shares: 7.936e+08 }
-    - { t: GE, name: "GE Aerospace", sector: "Industrials", shares: 1.038e+09 }
-    - { t: PM, name: "Philip Morris International", sector: "Consumer Staples", shares: 1.559e+09 }
+    - { t: CVX, name: "Chevron", sector: "Energy", shares: 1.951e+09 }
+    - { t: KO, name: "Coca-Cola", sector: "Consumer Staples", shares: 4.302e+09 }
+    - { t: PLTR, name: "Palantir Technologies", sector: "Information Technology", shares: 2.409e+09 }
+    - { t: PG, name: "Procter & Gamble", sector: "Consumer Staples", shares: 2.318e+09 }
+    - { t: ORCL, name: "Oracle", sector: "Information Technology", shares: 3.118e+09 }
+    - { t: CSCO, name: "Cisco", sector: "Information Technology", shares: 3.937e+09 }
+    - { t: UNH, name: "UnitedHealth", sector: "Health Care", shares: 8.96e+08 }
+    - { t: MRK, name: "Merck", sector: "Health Care", shares: 2.465e+09 }
+    - { t: BAC, name: "Bank of America", sector: "Financials", shares: 6.9e+09 }
     - { t: HD, name: "Home Depot", sector: "Consumer Discretionary", shares: 9.977e+08 }
-    - { t: NFLX, name: "Netflix", sector: "Communication Services", shares: 4.164e+09 }
-    - { t: DELL, name: "Dell Technologies", sector: "Information Technology", shares: 6.358e+08 }
-    - { t: PANW, name: "Palo Alto Networks", sector: "Information Technology", shares: 8.18e+08 }
-    - { t: MS, name: "Morgan Stanley", sector: "Financials", shares: 1.571e+09 }
-    - { t: RTX, name: "RTX", sector: "Industrials", shares: 1.348e+09 }
-    - { t: GS, name: "Goldman Sachs", sector: "Financials", shares: 2.912e+08 }
-    - { t: TXN, name: "Texas Instruments", sector: "Information Technology", shares: 9.132e+08 }
-    - { t: TMO, name: "Thermo Fisher Scientific", sector: "Health Care", shares: 3.697e+08 }
+    - { t: GE, name: "GE Aerospace", sector: "Industrials", shares: 1.033e+09 }
+    - { t: INTC, name: "Intel", sector: "Information Technology", shares: 5.315e+09 }
+    - { t: PM, name: "Philip Morris International", sector: "Consumer Staples", shares: 1.559e+09 }
+    - { t: MS, name: "Morgan Stanley", sector: "Financials", shares: 1.563e+09 }
+    - { t: AMAT, name: "Applied Materials", sector: "Information Technology", shares: 7.936e+08 }
+    - { t: LRCX, name: "Lam Research", sector: "Information Technology", shares: 1.249e+09 }
+    - { t: TXN, name: "Texas Instruments", sector: "Information Technology", shares: 9.138e+08 }
+    - { t: CAT, name: "Caterpillar", sector: "Industrials", shares: 4.576e+08 }
+    - { t: RTX, name: "RTX", sector: "Industrials", shares: 1.349e+09 }
+    - { t: GS, name: "Goldman Sachs", sector: "Financials", shares: 2.884e+08 }
+    - { t: PANW, name: "Palo Alto Networks", sector: "Information Technology", shares: 8.188e+08 }
+    - { t: TMO, name: "Thermo Fisher Scientific", sector: "Health Care", shares: 3.705e+08 }
     - { t: WFC, name: "Wells Fargo", sector: "Financials", shares: 3.002e+09 }
-    - { t: GEV, name: "GE Vernova", sector: "Industrials", shares: 2.663e+08 }
+    - { t: NFLX, name: "Netflix", sector: "Communication Services", shares: 4.106e+09 }
+    - { t: AMGN, name: "Amgen", sector: "Health Care", shares: 5.409e+08 }
+    - { t: ANET, name: "Arista Networks", sector: "Information Technology", shares: 1.263e+09 }
+    - { t: LIN, name: "Linde", sector: "Materials", shares: 4.591e+08 }
+    - { t: IBM, name: "IBM", sector: "Information Technology", shares: 9.451e+08 }
     - { t: CRWD, name: "CrowdStrike", sector: "Information Technology", shares: 1.024e+09 }
-    - { t: LIN, name: "Linde", sector: "Materials", shares: 4.61e+08 }
-    - { t: ANET, name: "Arista Networks", sector: "Information Technology", shares: 1.261e+09 }
-    - { t: AMGN, name: "Amgen", sector: "Health Care", shares: 5.406e+08 }
-    - { t: IBM, name: "IBM", sector: "Information Technology", shares: 9.421e+08 }
-    - { t: KLAC, name: "KLA", sector: "Information Technology", shares: 1.305e+09 }
-    - { t: AXP, name: "American Express", sector: "Financials", shares: 6.753e+08 }
-    - { t: MRVL, name: "Marvell Technology", sector: "Information Technology", shares: 8.987e+08 }
-    - { t: C, name: "Citigroup", sector: "Financials", shares: 1.677e+09 }
+    - { t: DELL, name: "Dell Technologies", sector: "Information Technology", shares: 6.358e+08 }
+    - { t: AXP, name: "American Express", sector: "Financials", shares: 6.706e+08 }
+    - { t: GEV, name: "GE Vernova", sector: "Industrials", shares: 2.647e+08 }
+    - { t: GILD, name: "Gilead Sciences", sector: "Health Care", shares: 1.24e+09 }
+    - { t: DIS, name: "Walt Disney", sector: "Communication Services", shares: 1.727e+09 }
+    - { t: C, name: "Citigroup", sector: "Financials", shares: 1.655e+09 }
   # --- end mega-caps ---
 
 # Optional extras. Each needs secrets (see .env.example / README).
